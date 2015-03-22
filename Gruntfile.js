@@ -72,7 +72,7 @@ module.exports = function(grunt) {
         },
     });
 
-    grunt.registerTask('default', ['jshint', 'mochacli']);
+    grunt.registerTask('default', ['jshint', 'mochacli', 'mocha_istanbul:coverage']);
     grunt.registerTask('coverage', ['mocha_istanbul:coverage']);
     grunt.registerTask('docs', ['jsdoc']);
 
