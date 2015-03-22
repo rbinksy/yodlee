@@ -63,9 +63,15 @@ module.exports = function(grunt) {
         },
         release: {
             options: {
-                npm: false                
+                npm: false
             }
-        }
+        },
+        coveralls: {
+            options: {            
+                src: 'test/coverage/lcov.info'                
+            },
+            
+        },
     });
 
     grunt.registerTask('default', ['jshint', 'mochacli']);

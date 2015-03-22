@@ -1,6 +1,6 @@
 {
   "name": "yodlee",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Yodlee API wrapper for Node.",
   "homepage": "https://github.com/craigrich/yodlee",
   "author": {
@@ -26,6 +26,7 @@
   "devDependencies": {
     "chai": "^2.1.2",
     "chai-as-promised": "^4.3.0",
+    "coveralls": "^2.11.2",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-jshint": "^0.11.0",
     "grunt-contrib-nodeunit": "^0.4.1",
