@@ -55,7 +55,7 @@ describe('yodlee node module', function() {
                     username: '',
                     password: '96d621ec-793a-4664-b2fa-17ba6796b116'
                 });
-            }).should.not.throw(Error);
+            }).should.throw(Error);
         });
 
         it('Should throw an error given an empty cobrand username', function() {
