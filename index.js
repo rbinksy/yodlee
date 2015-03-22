@@ -209,4 +209,4 @@ Yodlee.prototype.getTransactions = function getTransactions(accessToken, opt) {
 };
 
 
-module.exports = Yodlee;
+module.exports = Yodlee();
