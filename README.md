@@ -27,7 +27,7 @@ yodlee.use({
 
 ```
 
-##OAuth Requests
+## OAuth Requests
 Yodlee uses the standard oauth authentication flow in order to allow apps to act on a user's behalf. Therefore, the API provides a convenience methods to help you authenticate your users. 
 
 ```js
@@ -40,8 +40,8 @@ yodlee.getAccessToken({
 
 ```
 
-##Using the API
-###GET User Accounts
+## Using the API
+### GET User Accounts
 Returns the information related to the specified accounts aggregated by the User: [Yodlee Docs](https://developer.yodlee.com/Aggregation_API/Aggregation_Services_Guide/Aggregation_REST_API_Reference/getSiteAccounts)
 
 
@@ -52,7 +52,7 @@ yodleeAPI.getAccounts(accessToken)
 
 ```
 
-###GET User Transactions
+### GET User Transactions
 Executes a transaction search and returns the first page result: [Yodlee Docs](https://developer.yodlee.com/Aggregation_API/Aggregation_Services_Guide/Aggregation_REST_API_Reference/executeUserSearchRequest)
 
 ```js

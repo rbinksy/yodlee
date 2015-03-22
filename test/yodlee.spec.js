@@ -12,8 +12,7 @@ describe('yodlee node module', function() {
 
     var request = require('request'),
         yodlee = require('../');
-    // yodlee = Yodlee();
-
+    
     var postStub,
         appTokenStub;
 

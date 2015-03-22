@@ -7,7 +7,7 @@ module.exports = function(grunt) {
 
 
 
-    grunt.initConfig({        
+    grunt.initConfig({
         jshint: {
             options: {
                 jshintrc: '.jshintrc',
@@ -59,6 +59,11 @@ module.exports = function(grunt) {
             test: {
                 files: '<%= jshint.test.src %>',
                 tasks: ['jshint:test', 'mochacli']
+            }
+        },
+        release: {
+            options: {
+                npm: false                
             }
         }
     });
