@@ -30,39 +30,31 @@ var Q = require('q'),
  *
  * @module Yodlee
  * @constructor
- * @param {object} opt Cobrand username and password
  */
-function Yodlee(opt) {
-
+function Yodlee() {
     if (!(this instanceof Yodlee)) {
-        return new Yodlee(opt);
+        return new Yodlee();
+    }
+}
+
+ /**
+   * Use the specified Cobrand details to sign requests
+   * @param {object} opt Cobrand username and password
+   * @throws Error if options is empty
+   */
+Yodlee.prototype.use = function use(opt) {
+
+    if (!opt.username || !opt.password) {        
+        throw new Error('Invalid Cobrand Credentials: Empty ' + (!(opt.username) ? 'username' : 'password'));        
     }
 
     this.username = opt.username;
     this.password = opt.password;
-}
-
-
-Yodlee.prototype.google = function getAppToken() {
-
-    var deferred = Q.defer();
-
-    request.get({
-        url: 'http://www.google.com',
-    }, function(err, response, body) {
-        if (err) {
-            deferred.reject(err);
-        } else {
-            deferred.resolve(body);
-        }
-    });
-
-    return deferred.promise;
 
 };
 
 /**
- * Retrieves app token, determined by the saved Cobrand credentials.
+ * Retrieves app token, determined by Cobrand details.
  * @private
  */
 Yodlee.prototype.getAppToken = function getAppToken() {
@@ -92,12 +84,12 @@ Yodlee.prototype.getAppToken = function getAppToken() {
  * Retrieves access token for the given user
  * @param {object} opt User username and password
  */
-Yodlee.prototype.getAccessToken = function loginUser(opt) {
+Yodlee.prototype.getAccessToken = function getAccessToken(opt) {
 
     var deferred = Q.defer();
 
-    if (!opt.username || !opt.password) {
-        deferred.reject('Invalid User Credentials: Empty' + opt.username ? 'username' : 'password');
+    if (!opt.username || !opt.password) {        
+        deferred.reject('Invalid User Credentials: Empty ' + (!(opt.username) ? 'username' : 'password'));
     }
 
     this.getAppToken().then(function(appSessionToken) {
@@ -131,12 +123,15 @@ Yodlee.prototype.getAccessToken = function loginUser(opt) {
  * Retrieves all bank accounts for the given user
  * @param {string} accessToken  User access token
  */
-Yodlee.prototype.getAccounts = function(accessToken) {
+Yodlee.prototype.getAccounts = function getAccounts(accessToken) {
 
     var deferred = Q.defer();
 
+    console.log('looking');
+
     if (!accessToken) {
-        deferred.reject('Invalid Access Token: Empty!');
+        console.log('a');
+        deferred.reject('Invalid Access Token: Empty Access Token!');
     }
 
     this.getAppToken().then(function(appSessionToken) {
@@ -150,7 +145,9 @@ Yodlee.prototype.getAccounts = function(accessToken) {
                     }
                 },
                 function(err, response, body) {
+
                     if (err || JSON.parse(body).Error) {
+                        console.log('b');
                         deferred.reject(err || JSON.parse(body).Error[0].errorDetail);
                     } else {
                         deferred.resolve(body);
@@ -158,6 +155,7 @@ Yodlee.prototype.getAccounts = function(accessToken) {
                 });
     })
         .catch(function(e) {
+            console.log('c');
             deferred.reject(e);
         });
 
@@ -172,7 +170,7 @@ Yodlee.prototype.getAccounts = function(accessToken) {
  * @param {string} accessToken The user access token
  * @param {object} opt Optional args to call transaction
  */
-Yodlee.prototype.getTransactions = function(accessToken, opt) {
+Yodlee.prototype.getTransactions = function getTransactions(accessToken, opt) {
 
     var deferred = Q.defer();
 
