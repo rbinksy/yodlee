@@ -28,6 +28,18 @@ module.exports = function(grunt) {
                     coverageFolder: 'test/coverage',
                     mask: '*.spec.js'
                 }
+            },
+            coveralls: {
+                src: ['test/*.spec.js'],
+                options: {
+                    coverage: true,
+                    check: {
+                        lines: 75,
+                        statements: 75
+                    },
+                    root: './',
+                    reportFormats: ['cobertura', 'lcovonly']
+                }
             }
         },
         mochacli: {
@@ -65,14 +77,23 @@ module.exports = function(grunt) {
             }
         },
         coveralls: {
-            options: {            
-                src: 'test/coverage/lcov.info'                
+            options: {
+                src: 'test/coverage/lcov.info'
             },
-            
         },
     });
 
-    grunt.registerTask('default', ['jshint', 'mochacli', 'mocha_istanbul:coverage']);
+    grunt.event.on('coverage', function(lcov, done) {
+        console.log(lcov);
+        require('coveralls').handleInput(lcov, function(err) {
+            if (err) {
+                return done(err);
+            }
+            done();
+        });
+    });
+
+    grunt.registerTask('default', ['jshint', 'mochacli', 'mocha_istanbul:coveralls']);
     grunt.registerTask('coverage', ['mocha_istanbul:coverage']);
     grunt.registerTask('docs', ['jsdoc']);
 
