@@ -1,6 +1,6 @@
 {
   "name": "yodlee",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Yodlee API wrapper for Node.",
   "homepage": "https://github.com/craigrich/yodlee",
   "author": {
