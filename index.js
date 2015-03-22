@@ -127,10 +127,7 @@ Yodlee.prototype.getAccounts = function getAccounts(accessToken) {
 
     var deferred = Q.defer();
 
-    console.log('looking');
-
     if (!accessToken) {
-        console.log('a');
         deferred.reject('Invalid Access Token: Empty Access Token!');
     }
 
@@ -146,16 +143,14 @@ Yodlee.prototype.getAccounts = function getAccounts(accessToken) {
                 },
                 function(err, response, body) {
 
-                    if (err || JSON.parse(body).Error) {
-                        console.log('b');
+                    if (err || JSON.parse(body).Error) {                        
                         deferred.reject(err || JSON.parse(body).Error[0].errorDetail);
                     } else {
                         deferred.resolve(body);
                     }
                 });
     })
-        .catch(function(e) {
-            console.log('c');
+        .catch(function(e) {            
             deferred.reject(e);
         });
 
