@@ -7,3 +7,10 @@ node_js:
 before_install: npm install -g grunt-cli
 install: npm install
 before_script: grunt
+deploy:
+  provider: npm
+  email: "craig.rich@hotmail.co.uk"
+  api_key:
+    secure: Xd9DuwMWaFGptrrl6F/j3jzr2H4qsuHzVFidJfPNM0hID1sclnPCg8rjLzVO/owg79JwpfQN1AgnC+f7wSFv6STDARo52wvFVt1qgk3pmscJ6EJ4CmJIR5Uzru2Mz704wEBZx05a/1klYPK1TAyPuvgiE/GACl5AVCvzcmyQYUI=
+  on:
+    tags: true

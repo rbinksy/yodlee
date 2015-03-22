@@ -1,7 +1,7 @@
 {
     "name": "Yodlee",
-    "version": "0.0.1",
-    "description": "Yodlee API wrapper for node.",
+    "version": "0.1.0",
+    "description": "Yodlee API wrapper for Node.",
     "homepage": "https://github.com/craigrich/yodlee",
     "author": {
         "name": "Craig Richardson",
@@ -14,7 +14,10 @@
         "index.js"
     ],
     "keywords": [
-        "yodlee"
+        "yodlee",
+        "fintech",
+        "finance",
+        "banking"
     ],
     "dependencies": {
         "q": "^1.2.0",
