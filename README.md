@@ -71,8 +71,7 @@ yodleeAPI.getTransactions(accessToken, {
 ```
 
 ## License
-
-MIT © [Craig Richardson](craigrich.me)
+MIT © [Craig Richardson](https://www.linkedin.com/in/craigalanrichardson)
 
 
 [npm-image]: https://badge.fury.io/js/yodlee.svg
