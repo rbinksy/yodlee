@@ -47,7 +47,7 @@ Returns the information related to the specified accounts aggregated by the User
 
 ```js
 yodleeAPI.getAccounts(accessToken)
-  .then(function(accessToken) {})
+  .then(function(response) {})
   .catch(function(error) {}); 
 
 ```
@@ -65,7 +65,7 @@ yodleeAPI.getTransactions(accessToken, {
   searchFilterCurrencyCode: 'GBP',
   ignoreUserInput: true
 })
-  .then(function(accessToken) {})
+  .then(function(response) {})
   .catch(function(error) {}); 
 
 ```
