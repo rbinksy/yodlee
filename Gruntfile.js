@@ -1,8 +1,8 @@
 'use strict';
+
 module.exports = function(grunt) {
-    // Show elapsed time at the end
+    
     require('time-grunt')(grunt);
-    // Load all grunt tasks
     require('load-grunt-tasks')(grunt);
 
     grunt.initConfig({
@@ -83,7 +83,16 @@ module.exports = function(grunt) {
         },
     });
 
-    grunt.registerTask('default', ['jshint', 'mochacli', 'mocha_istanbul:coverage']);
+    grunt.event.on('coverage', function(lcov, done) {        
+        require('coveralls').handleInput(lcov, function(err) {
+            if (err) {
+                return done(err);
+            }
+            done();
+        });
+    });
+
+    grunt.registerTask('default', ['jshint', 'mochacli', 'mocha_istanbul:coveralls']);
     grunt.registerTask('coverage', ['mocha_istanbul:coverage']);
     grunt.registerTask('docs', ['jsdoc']);
 
