@@ -11,5 +11,5 @@
   "node": true,
   "sub": true,
   "undef": true,
-  "unused": false
+  "unused": true
 }

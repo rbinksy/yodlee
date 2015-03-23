@@ -83,17 +83,7 @@ module.exports = function(grunt) {
         },
     });
 
-    grunt.event.on('coverage', function(lcov, done) {
-        console.log(lcov);
-        require('coveralls').handleInput(lcov, function(err) {
-            if (err) {
-                return done(err);
-            }
-            done();
-        });
-    });
-
-    grunt.registerTask('default', ['jshint', 'mochacli', 'mocha_istanbul:coveralls']);
+    grunt.registerTask('default', ['jshint', 'mochacli', 'mocha_istanbul:coverage']);
     grunt.registerTask('coverage', ['mocha_istanbul:coverage']);
     grunt.registerTask('docs', ['jsdoc']);
 

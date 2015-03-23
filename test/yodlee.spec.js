@@ -2,17 +2,17 @@
 
 var chai = require("chai"),
     chaiAsPromised = require("chai-as-promised"),
-    sinon = require('sinon'),
-    sinonAsPromised = require('sinon-as-promised'),
-    should = chai.should();
+    sinon = require('sinon');
 
+require('sinon-as-promised');
 chai.use(chaiAsPromised);
+chai.should();
 
 describe('yodlee node module', function() {
 
     var request = require('request'),
         yodlee = require('../');
-    
+
     var postStub,
         appTokenStub;
 
