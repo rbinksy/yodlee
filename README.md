@@ -28,7 +28,7 @@ yodlee.use({
 ```
 
 ## OAuth Requests
-Yodlee uses the standard oauth authentication flow in order to allow apps to act on a user's behalf. Therefore, the API provides a convenience methods to help you authenticate your users. 
+Yodlee uses the standard oauth authentication flow in order to allow apps to act on a user's behalf. The API provides a convenience method to help you authenticate your users. 
 
 ```js
 yodlee.getAccessToken({
