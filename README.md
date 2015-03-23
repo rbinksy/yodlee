@@ -1,4 +1,4 @@
-#  [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coverage Status][coverage-image]][coverage-url] [![Climate Status][climate-image]][climate-url]  [![Dependency Status][daviddm-image]][daviddm-url]
+#  [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coverage Status][coverage-image]][coverage-url] [![Dependency Status][daviddm-image]][daviddm-url]
 
 > Yodlee API wrapper for node.
 
@@ -83,5 +83,3 @@ MIT © [Craig Richardson](craigrich.me)
 [daviddm-url]: https://david-dm.org/craigrich/yodlee
 [coverage-image]: https://coveralls.io/repos/craigrich/yodlee/badge.svg?branch=master
 [coverage-url]: https://coveralls.io/r/craigrich/yodlee?branch=master
-[climate-image]: https://codeclimate.com/repos/550ff64ee30ba02368004065/badges/1fa6b3345204d5b51cfe/gpa.svg
-[climate-url]: https://codeclimate.com/repos/550ff64ee30ba02368004065/feed
