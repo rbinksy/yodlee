@@ -37,15 +37,15 @@ function Yodlee() {
     }
 }
 
- /**
-   * Use the specified Cobrand details to sign requests
-   * @param {object} opt Cobrand username and password
-   * @throws Error if options is empty
-   */
+/**
+ * Use the specified Cobrand details to sign requests
+ * @param {object} opt Cobrand username and password
+ * @throws Error if options is empty
+ */
 Yodlee.prototype.use = function use(opt) {
 
-    if (!opt.username || !opt.password) {        
-        throw new Error('Invalid Cobrand Credentials: Empty ' + (!(opt.username) ? 'username' : 'password'));        
+    if (!opt.username || !opt.password) {
+        throw new Error('Invalid Cobrand Credentials: Empty ' + (!(opt.username) ? 'username' : 'password'));
     }
 
     this.username = opt.username;
@@ -88,7 +88,7 @@ Yodlee.prototype.getAccessToken = function getAccessToken(opt) {
 
     var deferred = Q.defer();
 
-    if (!opt.username || !opt.password) {        
+    if (!opt.username || !opt.password) {
         deferred.reject('Invalid User Credentials: Empty ' + (!(opt.username) ? 'username' : 'password'));
     }
 
@@ -143,14 +143,14 @@ Yodlee.prototype.getAccounts = function getAccounts(accessToken) {
                 },
                 function(err, response, body) {
 
-                    if (err || JSON.parse(body).Error) {                        
+                    if (err || JSON.parse(body).Error) {
                         deferred.reject(err || JSON.parse(body).Error[0].errorDetail);
                     } else {
                         deferred.resolve(body);
                     }
                 });
     })
-        .catch(function(e) {            
+        .catch(function(e) {
             deferred.reject(e);
         });
 
@@ -175,31 +175,33 @@ Yodlee.prototype.getTransactions = function getTransactions(accessToken, opt) {
         deferred.reject('Invalid Access Token: Empty!');
     }
 
-    this.getAppToken().then(function(appSessionToken) {
+    this.getAppToken()
+        .then(function(appSessionToken) {
+            
+            request
+                .post({
+                        url: 'https://rest.developer.yodlee.com/services/srest/restserver/v1.0/jsonsdk/TransactionSearchService/executeUserSearchRequest',
+                        form: {
+                            'cobSessionToken': appSessionToken,
+                            'userSessionToken': accessToken,
+                            "transactionSearchRequest.containerType": opt.containerType || "All",
+                            "transactionSearchRequest.higherFetchLimit": opt.higherFetchLimit || "500",
+                            "transactionSearchRequest.lowerFetchLimit": opt.lowerFetchLimit || "1",
+                            "transactionSearchRequest.resultRange.endNumber": opt.endNumber || 5,
+                            "transactionSearchRequest.resultRange.startNumber": opt.startNumber || 1,
+                            "transactionSearchRequest.searchFilter.currencyCode": opt.currencyCode || "USD",
+                            "transactionSearchRequest.ignoreUserInput": opt.ignoreUserInput || "true"
+                        }
+                    },
+                    function(err, response, body) {
+                        if (err || JSON.parse(body).errorOccurred) {
+                            deferred.reject(err || JSON.parse(body).message);
+                        } else {
+                            deferred.resolve(body);
+                        }
+                    });
+        })
 
-        request
-            .post({
-                    url: 'https://rest.developer.yodlee.com/services/srest/restserver/v1.0/jsonsdk/TransactionSearchService/executeUserSearchRequest',
-                    form: {
-                        'cobSessionToken': appSessionToken,
-                        'userSessionToken': accessToken,
-                        'transactionSearchRequest.containerType': 'All',
-                        'transactionSearchRequest.higherFetchLimit': '500',
-                        'transactionSearchRequest.lowerFetchLimit': '1',
-                        'transactionSearchRequest.resultRangeEndNumber': 60,
-                        'transactionSearchRequest.resultRangeStartNumber': 1,
-                        'transactionSearchRequest.searchFilter.currencyCode': 'USD',
-                        'transactionSearchRequest.ignoreUserInput': 'true'
-                    }
-                },
-                function(err, response, body) {
-                    if (err || JSON.parse(body).Error) {
-                        deferred.reject(err || JSON.parse(body).Error[0].errorDetail);
-                    } else {
-                        deferred.resolve(body);
-                    }
-                });
-    })
         .catch(function(e) {
             deferred.reject(e);
         });

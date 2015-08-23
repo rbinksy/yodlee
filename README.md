@@ -46,7 +46,7 @@ Returns the information related to the specified accounts aggregated by the User
 
 
 ```js
-yodleeAPI.getAccounts(accessToken)
+yodlee.getAccounts(accessToken)
   .then(function(response) {})
   .catch(function(error) {}); 
 
@@ -56,7 +56,7 @@ yodleeAPI.getAccounts(accessToken)
 Executes a transaction search and returns the first page result: [Yodlee Docs](https://developer.yodlee.com/Aggregation_API/Aggregation_Services_Guide/Aggregation_REST_API_Reference/executeUserSearchRequest)
 
 ```js
-yodleeAPI.getTransactions(accessToken, {
+yodlee.getTransactions(accessToken, {
   containerType: 'All',
   higherFetchLimit: 500,
   lowerFetchLimit: 1,
@@ -69,6 +69,17 @@ yodleeAPI.getTransactions(accessToken, {
   .catch(function(error) {}); 
 
 ```
+
+## Contributing
+
+**Unit test**
+Unit test are written in [Mocha](http://visionmedia.github.io/mocha/). Please add a unit test for every new feature or bug fix. `npm test` to run the test suite.  
+
+**Documentation**
+Add documentation for every API change. Feel free to send corrections or better docs!  
+
+**Pull Requests**
+Send _fixes_ PR on the `master` branch.
 
 ## License
 MIT © [Craig Richardson](https://www.linkedin.com/in/craigalanrichardson)

@@ -258,9 +258,9 @@ describe('yodlee node module', function() {
 
         it('should return an error on an invalid response from the API', function() {
             postStub.yields(null, null, JSON.stringify({
-                Error: [{
-                    errorMessage: "Error"
-                }]
+                errorOccurred: true,
+                message: 'error'
+
             }));
             return yodlee.getTransactions(accessToken).should.eventually.be.rejected;
         });
