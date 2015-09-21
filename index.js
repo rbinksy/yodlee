@@ -95,7 +95,7 @@ Yodlee.prototype.init = function init(opt) {
         this.sessionTokens.userSessionToken.expires = opt.userSessionExpires;
         deferred.resolve();
     } else if(opt.cobSessionToken || opt.userSessionToken || opt.cobSessionExpires || opt.userSessionExpires) {
-        throw new Error('When providing session tokens the both tokens and accompanying expiration timestamps are required.');
+        throw new Error('When providing session tokens both tokens and accompanying expiration timestamps are required.');
     } else {
         // cobLogin only required when tokens are not provided
         this.cobLogin().then(function(cobLogin){
@@ -207,7 +207,7 @@ Yodlee.prototype.getCobSessionToken = function getCobSessionToken() {
 };
 
 /**
- * Retrieves userSessionToken from memory or cobLogin if expired / not set
+ * Retrieves userSessionToken from memory or login if expired / not set
  * @private
  */
 Yodlee.prototype.getUserSessionToken = function getUserSessionToken() {
@@ -231,6 +231,10 @@ Yodlee.prototype.getUserSessionToken = function getUserSessionToken() {
 
 };
 
+/**
+ * Retrieves both the userSessionToken and cobSessionToken from memory / fetches them from API if expired
+ * @private
+ */
 Yodlee.prototype.getBothSessionTokens = function getBothSessionTokens() {
 
     var deferred = Q.defer();
@@ -253,7 +257,7 @@ Yodlee.prototype.getBothSessionTokens = function getBothSessionTokens() {
 };
 
 /**
- * Retrieves all site accounts for the given user
+ * Retrieves all site accounts for the authenticated user
  */
 Yodlee.prototype.getAllSiteAccounts = function getAllSiteAccounts() {
 
@@ -283,8 +287,7 @@ Yodlee.prototype.getAllSiteAccounts = function getAllSiteAccounts() {
 };
 
 /**
- * Retrieves all bank transactions for the given user
- *
+ * Retrieves all bank transactions for the authenticated user
  * @param {object} opt Optional args to call transaction
  */
 Yodlee.prototype.getTransactions = function getTransactions(opt) {
@@ -292,10 +295,6 @@ Yodlee.prototype.getTransactions = function getTransactions(opt) {
     var deferred = Q.defer();
 
     opt = opt || {};
-
-    if (!accessToken) {
-        deferred.reject('Invalid Access Token: Empty!');
-    }
 
     this.getBothSessionTokens().then(function(tokens) {
             
@@ -331,7 +330,6 @@ Yodlee.prototype.getTransactions = function getTransactions(opt) {
 
 /**
  * Gets the login form for a given Yodlee site ID
- *
  * @param {object} opt args to get login form
  */
 Yodlee.prototype.getSiteLoginForm = function getSiteLoginForm(opt) {
@@ -366,53 +364,5 @@ Yodlee.prototype.getSiteLoginForm = function getSiteLoginForm(opt) {
     return deferred.promise;
 
 }
-
-/**
- * Adds an account for a given Yodlee site
- *
- * @param {string} accessToken The user access token
- * @param {object} opt Optional args to call transaction
- */
-// Yodlee.prototype.addSiteAccount = function addSiteAccount(accessToken, opt) {
-
-//     var deferred = Q.defer();
-
-//     opt = opt || {};
-
-//     if (!accessToken) {
-//         deferred.reject('Invalid Access Token: Empty!');
-//     }
-
-//     this.getAppToken().then(function(appSessionToken) {
-            
-//         request.post({
-//             url: this.baseUrl + 'jsonsdk/TransactionSearchService/executeUserSearchRequest',
-//             form: {
-//                 'cobSessionToken': appSessionToken,
-//                 'userSessionToken': accessToken,
-//                 "transactionSearchRequest.containerType": opt.containerType || "All",
-//                 "transactionSearchRequest.higherFetchLimit": opt.higherFetchLimit || "500",
-//                 "transactionSearchRequest.lowerFetchLimit": opt.lowerFetchLimit || "1",
-//                 "transactionSearchRequest.resultRange.endNumber": opt.endNumber || 5,
-//                 "transactionSearchRequest.resultRange.startNumber": opt.startNumber || 1,
-//                 "transactionSearchRequest.searchFilter.currencyCode": opt.currencyCode || "USD",
-//                 "transactionSearchRequest.ignoreUserInput": opt.ignoreUserInput || "true"
-//             }
-//         },
-//         function(err, response, body) {
-//             if (err || JSON.parse(body).errorOccurred) {
-//                 deferred.reject(err || JSON.parse(body).message);
-//             } else {
-//                 deferred.resolve(body);
-//             }
-//         });
-
-//     }.bind(this)).catch(function(e) {
-//         deferred.reject(e);
-//     });
-
-//     return deferred.promise;
-
-// };
 
 module.exports = Yodlee();
