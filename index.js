@@ -38,11 +38,31 @@ function Yodlee() {
 }
 
 /**
-* Base URLs for sandbox or live API
+* Base URL for sandbox
 * @private
 */
 Yodlee.prototype.sandboxUrl = "https://yisandbox.yodleeinteractive.com/services/srest/private-{{sandboxuser}}/v1.0/";
+
+/**
+* Base URL for live
+* @private
+*/
 Yodlee.prototype.liveUrl = "https://rest.developer.yodlee.com/services/srest/restserver/v1.0/";
+
+/**
+* Session tokens for Yodlee
+* @private
+*/
+Yodlee.prototype.sessionTokens = {
+    cobSessionToken: {
+        token: null,
+        expires: null
+    },
+    userSessionToken: {
+        token: null,
+        expires: null
+    }
+};
 
 /**
  * Use the specified Cobrand details to sign requests
@@ -50,6 +70,8 @@ Yodlee.prototype.liveUrl = "https://rest.developer.yodlee.com/services/srest/res
  * @throws Error if options is empty
  */
 Yodlee.prototype.use = function use(opt) {
+
+    var deferred = Q.defer();
 
     if (!opt.username || !opt.password) {
         throw new Error('Invalid Cobrand Credentials: Empty ' + (!(opt.username) ? 'username' : 'password'));
@@ -65,15 +87,27 @@ Yodlee.prototype.use = function use(opt) {
         this.baseUrl = this.liveUrl;
     }
 
+    this.cobLogin().then(function(cobLogin){
+        deferred.resolve();
+    }).catch(function(e){
+        deferred.reject(e);
+    });
+
+    return deferred.promise;
+
 };
 
 /**
- * Retrieves app token, determined by Cobrand details.
- * @private
+ * Fetch the cobLogin object and save cobSessionToken in memory
+ * @throws Error if username and password for cobLogin have not been set
  */
-Yodlee.prototype.getAppToken = function getAppToken() {
+Yodlee.prototype.cobLogin = function() {
 
     var deferred = Q.defer();
+
+    if (!this.username || !this.password) {
+        throw new Error('Invalid Username and Password: Empty ' + (!(this.username) ? 'username' : 'password'));
+    }
 
     request.post({
         url: this.baseUrl + 'authenticate/coblogin',
@@ -85,19 +119,22 @@ Yodlee.prototype.getAppToken = function getAppToken() {
         if (err || JSON.parse(body).Error) {
             deferred.reject(err || JSON.parse(body).Error[0].errorDetail);
         } else {
-            deferred.resolve(JSON.parse(body).cobrandConversationCredentials.sessionToken);
+            var expires = new Date();
+            this.sessionTokens.cobSessionToken.token = JSON.parse(body).cobrandConversationCredentials.sessionToken;
+            this.sessionTokens.cobSessionToken.expires = expires.setMinutes(expires.getMinutes() + 20);
+            deferred.resolve(JSON.parse(body));
         }
-    });
+    }.bind(this));
 
     return deferred.promise;
 
-};
+ };
 
 /**
- * Retrieves access token for the given user
+ * Retrieves login object for the given user
  * @param {object} opt User username and password
  */
-Yodlee.prototype.getAccessToken = function getAccessToken(opt) {
+Yodlee.prototype.login = function login(opt) {
 
     var deferred = Q.defer();
 
@@ -105,72 +142,133 @@ Yodlee.prototype.getAccessToken = function getAccessToken(opt) {
         deferred.reject('Invalid User Credentials: Empty ' + (!(opt.username) ? 'username' : 'password'));
     }
 
-    this.getAppToken().then(function(appSessionToken) {
+    this.getCobSessionToken().then(function(cobSessionToken){
 
         request.post({
-                url: this.baseUrl + 'authenticate/login',
-                form: {
-                    login: opt.username,
-                    password: opt.password,
-                    cobSessionToken: appSessionToken
-                }
-            },
-
-            function(err, response, body) {
-                if (err || JSON.parse(body).Error) {
-                    deferred.reject(err || JSON.parse(body).Error[0].errorDetail);
-                } else {
-                    deferred.resolve(JSON.parse(body).userContext.conversationCredentials.sessionToken);
-                }
-            });
-    }.bind(this))
-        .catch(function(e) {
-            deferred.reject(e);
+            url: this.baseUrl + 'authenticate/login',
+            form: {
+                login: opt.username,
+                password: opt.password,
+                cobSessionToken: cobSessionToken
+            }
+        }, function(err, response, body) {
+            if (err || JSON.parse(body).Error) {
+                deferred.reject(err || JSON.parse(body).Error[0].errorDetail);
+            } else {
+                var expires = new Date();
+                this.sessionTokens.userSessionToken.token = JSON.parse(body).userContext.conversationCredentials.sessionToken;
+                this.sessionTokens.userSessionToken.expires = expires.setMinutes(expires.getMinutes() + 20);
+                deferred.resolve(JSON.parse(body));
+            }
         });
+
+    }).catch(function(e){
+        deferred.reject(e);
+    });
 
     return deferred.promise;
 
 };
 
 /**
- * Retrieves all bank accounts for the given user
- * @param {string} accessToken  User access token
+ * Retrieves cobSessionToken from memory or cobLogin if expired / not set
+ * @private
  */
-Yodlee.prototype.getAccounts = function getAccounts(accessToken) {
+Yodlee.prototype.getCobSessionToken = function getCobSessionToken() {
 
     var deferred = Q.defer();
 
-    if (!accessToken) {
-        deferred.reject('Invalid Access Token: Empty Access Token!');
-    }
+    var date = new Date();
 
-    this.getAppToken().then(function(appSessionToken) {
-
-        request
-            .post({
-                    url: this.baseUrl + 'jsonsdk/SiteAccountManagement/getSiteAccounts',
-                    form: {
-                        'cobSessionToken': appSessionToken,
-                        'userSessionToken': accessToken
-                    }
-                },
-                function(err, response, body) {
-
-                    if (err || JSON.parse(body).Error) {
-                        deferred.reject(err || JSON.parse(body).Error[0].errorDetail);
-                    } else {
-                        deferred.resolve(body);
-                    }
-                });
-    }.bind(this))
-        .catch(function(e) {
+    if(this.sessionTokens.cobSessionToken.token != null && this.sessionTokens.cobSessionToken.expires > date.getTime()) {
+        deferred.resolve(this.sessionTokens.cobSessionToken.token);
+    } else {
+        this.cobLogin().then(function(cobLogin) {
+            deferred.resolve(cobLogin.cobrandConversationCredentials.sessionToken);
+        }).catch(function(e) {
             deferred.reject(e);
         });
+    }
 
     return deferred.promise;
 
 };
 
+/**
+ * Retrieves userSessionToken from memory or cobLogin if expired / not set
+ * @private
+ */
+Yodlee.prototype.getUserSessionToken = function getUserSessionToken() {
+
+    var deferred = Q.defer();
+
+    var date = new Date();
+
+    if(this.sessionTokens.userSessionToken.token != null && this.sessionTokens.userSessionToken.expires > date.getTime()) {
+        deferred.resolve(this.sessionTokens.userSessionToken.token);
+    } else {
+        this.cobLogin().then(function(login) {
+            deferred.resolve(login.userContext.conversationCredentials.sessionToken);
+        }).catch(function(e) {
+            deferred.reject(e);
+        });
+    }
+
+    return deferred.promise;
+
+
+};
+
+Yodlee.prototype.getBothSessionTokens = function getBothSessionTokens() {
+
+    var deferred = Q.defer();
+
+    this.getCobSessionToken().then(function(cobSessionToken){
+        this.getUserSessionToken().then(function(userSessionToken){
+            deferred.resolve({
+                cobSessionToken: cobSessionToken,
+                userSessionToken: userSessionToken
+            });
+        }).catch(function(e){
+            deferred.reject(e);
+        });
+    }.bind(this)).catch(function(e){
+        deferred.reject(e);
+    });
+
+    return deferred.promise;
+
+};
+
+/**
+ * Retrieves all site accounts for the given user
+ */
+Yodlee.prototype.getAllSiteAccounts = function getAllSiteAccounts() {
+
+    var deferred = Q.defer();
+
+    this.getBothSessionTokens().then(function(tokens){
+        request.post({
+            url: this.baseUrl + 'jsonsdk/SiteAccountManagement/getAllSiteAccounts',
+            form: {
+                'cobSessionToken': tokens.cobSessionToken,
+                'userSessionToken': tokens.userSessionToken
+            }
+        },
+        function(err, response, body) {
+            if (err || JSON.parse(body).Error) {
+                deferred.reject(err || JSON.parse(body).Error[0].errorDetail);
+            } else {
+                deferred.resolve(JSON.parse(body));
+            }
+        });
+    }).catch(function(e){
+        deferred.reject(e);
+    });
+
+    return deferred.promise;
+
+};
 
 /**
  * Retrieves all bank transactions for the given user
@@ -188,40 +286,124 @@ Yodlee.prototype.getTransactions = function getTransactions(accessToken, opt) {
         deferred.reject('Invalid Access Token: Empty!');
     }
 
-    this.getAppToken()
-        .then(function(appSessionToken) {
+    this.getAppToken().then(function(appSessionToken) {
             
-            request
-                .post({
-                        url: this.baseUrl + 'jsonsdk/TransactionSearchService/executeUserSearchRequest',
-                        form: {
-                            'cobSessionToken': appSessionToken,
-                            'userSessionToken': accessToken,
-                            "transactionSearchRequest.containerType": opt.containerType || "All",
-                            "transactionSearchRequest.higherFetchLimit": opt.higherFetchLimit || "500",
-                            "transactionSearchRequest.lowerFetchLimit": opt.lowerFetchLimit || "1",
-                            "transactionSearchRequest.resultRange.endNumber": opt.endNumber || 5,
-                            "transactionSearchRequest.resultRange.startNumber": opt.startNumber || 1,
-                            "transactionSearchRequest.searchFilter.currencyCode": opt.currencyCode || "USD",
-                            "transactionSearchRequest.ignoreUserInput": opt.ignoreUserInput || "true"
-                        }
-                    },
-                    function(err, response, body) {
-                        if (err || JSON.parse(body).errorOccurred) {
-                            deferred.reject(err || JSON.parse(body).message);
-                        } else {
-                            deferred.resolve(body);
-                        }
-                    });
-        }.bind(this))
-
-        .catch(function(e) {
-            deferred.reject(e);
+        request.post({
+            url: this.baseUrl + 'jsonsdk/TransactionSearchService/executeUserSearchRequest',
+            form: {
+                'cobSessionToken': appSessionToken,
+                'userSessionToken': accessToken,
+                "transactionSearchRequest.containerType": opt.containerType || "All",
+                "transactionSearchRequest.higherFetchLimit": opt.higherFetchLimit || "500",
+                "transactionSearchRequest.lowerFetchLimit": opt.lowerFetchLimit || "1",
+                "transactionSearchRequest.resultRange.endNumber": opt.endNumber || 5,
+                "transactionSearchRequest.resultRange.startNumber": opt.startNumber || 1,
+                "transactionSearchRequest.searchFilter.currencyCode": opt.currencyCode || "USD",
+                "transactionSearchRequest.ignoreUserInput": opt.ignoreUserInput || "true"
+            }
+        },
+        function(err, response, body) {
+            if (err || JSON.parse(body).errorOccurred) {
+                deferred.reject(err || JSON.parse(body).message);
+            } else {
+                deferred.resolve(body);
+            }
         });
+
+    }.bind(this)).catch(function(e) {
+        deferred.reject(e);
+    });
 
     return deferred.promise;
 
 };
 
+/**
+ * Adds an account for a given Yodlee site
+ *
+ * @param {object} opt args to get login form
+ */
+Yodlee.prototype.getSiteLoginForm = function getSiteLoginForm(opt) {
+
+    var deferred = Q.defer();
+
+    if (!opt.siteId) {
+        deferred.reject('Invalid Site ID: Empty!');
+    } else if (!opt.accessToken) {
+        deferred.reject('Invalid Access Token: Empty!');
+    }
+
+    this.getAppToken().then(function(appSessionToken) {
+
+        request.post({
+            url: this.baseUrl + 'jsonsdk/SiteAccountManagement/getSiteLoginForm',
+            form: {
+                'cobSessionToken': appSessionToken,
+                'siteId': opt.siteId
+            }
+        },
+        function(err, response, body) {
+            if (err || JSON.parse(body).Error) {
+                deferred.reject(err || JSON.parse(body).message);
+            } else {
+                deferred.resolve(JSON.parse(body));
+            }
+        });
+
+    }.bind(this)).catch(function(e) {
+        deferred.reject(e);
+    });
+
+    return deferred.promise;
+
+}
+
+/**
+ * Adds an account for a given Yodlee site
+ *
+ * @param {string} accessToken The user access token
+ * @param {object} opt Optional args to call transaction
+ */
+// Yodlee.prototype.addSiteAccount = function addSiteAccount(accessToken, opt) {
+
+//     var deferred = Q.defer();
+
+//     opt = opt || {};
+
+//     if (!accessToken) {
+//         deferred.reject('Invalid Access Token: Empty!');
+//     }
+
+//     this.getAppToken().then(function(appSessionToken) {
+            
+//         request.post({
+//             url: this.baseUrl + 'jsonsdk/TransactionSearchService/executeUserSearchRequest',
+//             form: {
+//                 'cobSessionToken': appSessionToken,
+//                 'userSessionToken': accessToken,
+//                 "transactionSearchRequest.containerType": opt.containerType || "All",
+//                 "transactionSearchRequest.higherFetchLimit": opt.higherFetchLimit || "500",
+//                 "transactionSearchRequest.lowerFetchLimit": opt.lowerFetchLimit || "1",
+//                 "transactionSearchRequest.resultRange.endNumber": opt.endNumber || 5,
+//                 "transactionSearchRequest.resultRange.startNumber": opt.startNumber || 1,
+//                 "transactionSearchRequest.searchFilter.currencyCode": opt.currencyCode || "USD",
+//                 "transactionSearchRequest.ignoreUserInput": opt.ignoreUserInput || "true"
+//             }
+//         },
+//         function(err, response, body) {
+//             if (err || JSON.parse(body).errorOccurred) {
+//                 deferred.reject(err || JSON.parse(body).message);
+//             } else {
+//                 deferred.resolve(body);
+//             }
+//         });
+
+//     }.bind(this)).catch(function(e) {
+//         deferred.reject(e);
+//     });
+
+//     return deferred.promise;
+
+// };
 
 module.exports = Yodlee();
