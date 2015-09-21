@@ -69,7 +69,7 @@ Yodlee.prototype.sessionTokens = {
  * @param {object} opt Cobrand username and password
  * @throws Error if options is empty
  */
-Yodlee.prototype.init = function init(opt) {
+Yodlee.prototype.use = function use(opt) {
 
     var deferred = Q.defer();
 
@@ -98,7 +98,7 @@ Yodlee.prototype.init = function init(opt) {
         throw new Error('When providing session tokens both tokens and accompanying expiration timestamps are required.');
     } else {
         // cobLogin only required when tokens are not provided
-        this.cobLogin().then(function(cobLogin){
+        this.cobLogin().then(function(){
             deferred.resolve();
         }).catch(function(e){
             deferred.reject(e);
@@ -363,6 +363,6 @@ Yodlee.prototype.getSiteLoginForm = function getSiteLoginForm(opt) {
 
     return deferred.promise;
 
-}
+};
 
 module.exports = Yodlee();
