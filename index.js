@@ -21,8 +21,8 @@
 
 'use strict';
 
-var Q = require('q'),
-    request = require('request');
+var Q = require('q');
+var request = require('request');
 
 /**
  * Yodlee API driver for NodeJS
@@ -38,6 +38,21 @@ function Yodlee() {
 }
 
 /**
+* Base URLs for sandbox or live API
+* @private
+*/
+Yodlee.prototype.sandboxUrl = "https://yisandbox.yodleeinteractive.com/services/srest/private-sandbox16/v1.0/";
+Yodlee.prototype.liveUrl = "https://rest.developer.yodlee.com/services/srest/restserver/v1.0/";
+
+/**
+* Returns the API base URL - sandbox or live
+* @private
+*/
+Yodlee.prototype.getBaseUrl = function getBaseUrl() {
+    return this.sandbox ? this.sandboxUrl : this.liveUrl;
+};
+
+/**
  * Use the specified Cobrand details to sign requests
  * @param {object} opt Cobrand username and password
  * @throws Error if options is empty
@@ -46,6 +61,19 @@ Yodlee.prototype.use = function use(opt) {
 
     if (!opt.username || !opt.password) {
         throw new Error('Invalid Cobrand Credentials: Empty ' + (!(opt.username) ? 'username' : 'password'));
+    }
+
+    this.sandbox = (opt.sandbox === true);
+
+    if(opt.sandbox) {
+
+        if (!opt.sandboxUsername || !opt.sandboxPassword) {
+            throw new Error('Invalid Cobrand Credentials: Empty ' + (!(opt.sandboxUsername) ? 'sandboxUsername' : 'sandboxPassword'));
+        }
+
+        this.sandboxUsername = opt.sandboxUsername;
+        this.sandboxPassword = opt.sandboxPassword;
+
     }
 
     this.username = opt.username;
@@ -62,7 +90,7 @@ Yodlee.prototype.getAppToken = function getAppToken() {
     var deferred = Q.defer();
 
     request.post({
-        url: 'https://rest.developer.yodlee.com/services/srest/restserver/v1.0/authenticate/coblogin',
+        url: this.getBaseUrl() + 'authenticate/coblogin',
         form: {
             cobrandLogin: this.username,
             cobrandPassword: this.password
@@ -95,7 +123,7 @@ Yodlee.prototype.getAccessToken = function getAccessToken(opt) {
     this.getAppToken().then(function(appSessionToken) {
 
         request.post({
-                url: 'https://rest.developer.yodlee.com/services/srest/restserver/v1.0/authenticate/login',
+                url: this.getBaseUrl() + 'authenticate/login',
                 form: {
                     login: opt.username,
                     password: opt.password,
@@ -135,7 +163,7 @@ Yodlee.prototype.getAccounts = function getAccounts(accessToken) {
 
         request
             .post({
-                    url: 'https://rest.developer.yodlee.com/services/srest/restserver/v1.0/jsonsdk/SiteAccountManagement/getSiteAccounts',
+                    url: this.getBaseUrl() + 'jsonsdk/SiteAccountManagement/getSiteAccounts',
                     form: {
                         'cobSessionToken': appSessionToken,
                         'userSessionToken': accessToken
@@ -180,7 +208,7 @@ Yodlee.prototype.getTransactions = function getTransactions(accessToken, opt) {
             
             request
                 .post({
-                        url: 'https://rest.developer.yodlee.com/services/srest/restserver/v1.0/jsonsdk/TransactionSearchService/executeUserSearchRequest',
+                        url: this.getBaseUrl() + 'jsonsdk/TransactionSearchService/executeUserSearchRequest',
                         form: {
                             'cobSessionToken': appSessionToken,
                             'userSessionToken': accessToken,
