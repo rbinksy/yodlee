@@ -56,7 +56,6 @@ Yodlee.prototype.use = function use(opt) {
     }
 
     this.sandbox = (opt.sandbox === true);
-
     this.username = opt.username;
     this.password = opt.password;
 
