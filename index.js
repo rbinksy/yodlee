@@ -57,22 +57,14 @@ Yodlee.prototype.use = function use(opt) {
 
     this.sandbox = (opt.sandbox === true);
 
+    this.username = opt.username;
+    this.password = opt.password;
+
     if(opt.sandbox) {
-
-        if (!opt.sandboxUsername || !opt.sandboxPassword) {
-            throw new Error('Invalid Cobrand Credentials: Empty ' + (!(opt.sandboxUsername) ? 'sandboxUsername' : 'sandboxPassword'));
-        }
-
-        this.sandboxUsername = opt.sandboxUsername;
-        this.sandboxPassword = opt.sandboxPassword;
-        this.baseUrl = this.sandboxUrl.replace("{{sandboxuser}}", this.sandboxUsername);
-
+        this.baseUrl = this.sandboxUrl.replace("{{sandboxuser}}", this.username);
     } else {
         this.baseUrl = this.liveUrl;
     }
-
-    this.username = opt.username;
-    this.password = opt.password;
 
 };
 

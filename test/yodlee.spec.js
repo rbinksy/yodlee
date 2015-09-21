@@ -61,47 +61,22 @@ describe('yodlee node module', function() {
             }).should.throw(Error);
         });
 
-        it('Should throw an error given empty sandbox username, when sandbox == true', function() {
-            (function() {
-                yodlee.use({
-                    username: 'sbCobcraigrich',
-                    password: '96d621ec-793a-4664-b2fa-17ba6796b116',
-                    sandbox: true
-                });
-            }).should.throw(Error);
-        });
-
-        it('Should throw an error given empty sandbox password, when sandbox == true', function() {
-            (function() {
-                yodlee.use({
-                    username: 'sbCobcraigrich',
-                    password: '96d621ec-793a-4664-b2fa-17ba6796b116',
-                    sandbox: true,
-                    sandboxUsername: 'sandboxuser'
-                });
-            }).should.throw(Error);
-        });
-
-        it('Should set sandbox to true when passed as true, also set usernames, passwords and baseUrl', function() {
+        it('Should set sandbox to true and baseUrl to sandboxUrl', function() {
 
             yodlee.use({
-                username: 'sbCobExampleUser',
-                password: '96d621ec-2323-4664-b2fa-17ba6796b116',
-                sandbox: true,
-                sandboxUsername: 'sandboxuser',
-                sandboxPassword: 'password@123'
+                username: 'sandboxuser',
+                password: 'password@123',
+                sandbox: true
             });
 
-            yodlee.username.should.equal('sbCobExampleUser');
-            yodlee.password.should.equal('96d621ec-2323-4664-b2fa-17ba6796b116');
+            yodlee.username.should.equal('sandboxuser');
+            yodlee.password.should.equal('password@123');
             yodlee.sandbox.should.equal(true);
-            yodlee.sandboxUsername.should.equal('sandboxuser');
-            yodlee.sandboxPassword.should.equal('password@123');
             yodlee.baseUrl.should.equal('https://yisandbox.yodleeinteractive.com/services/srest/private-sandboxuser/v1.0/');
 
         });
 
-        it('Should set sandbox to false when not passed, also set usernames, passwords and baseUrl', function() {
+        it('Should set sandbox to false and baseUrl to liveUrl - empty sandbox state', function() {
             
             yodlee.use({
                 username: 'sbCobExampleUser',
@@ -115,7 +90,7 @@ describe('yodlee node module', function() {
 
         });
 
-        it('Should set sandbox to false when passed as false, also set usernames, passwords and baseUrl', function() {
+        it('Should set sandbox to false and baseUrl to liveUrl', function() {
 
             yodlee.use({
                 username: 'sbCobExampleUser',
