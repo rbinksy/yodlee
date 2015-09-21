@@ -69,7 +69,7 @@ Yodlee.prototype.sessionTokens = {
  * @param {object} opt Cobrand username and password
  * @throws Error if options is empty
  */
-Yodlee.prototype.use = function use(opt) {
+Yodlee.prototype.init = function init(opt) {
 
     var deferred = Q.defer();
 
@@ -87,11 +87,23 @@ Yodlee.prototype.use = function use(opt) {
         this.baseUrl = this.liveUrl;
     }
 
-    this.cobLogin().then(function(cobLogin){
+    // User can overrride tokens up front if they have cached valid tokens
+    if(opt.cobSessionToken && opt.userSessionToken && opt.cobSessionExpires && opt.userSessionExpires) {
+        this.sessionTokens.cobSessionToken.token = opt.cobSessionToken;
+        this.sessionTokens.cobSessionToken.expires = opt.cobSessionExpires;
+        this.sessionTokens.userSessionToken.token = opt.userSessionToken;
+        this.sessionTokens.userSessionToken.expires = opt.userSessionExpires;
         deferred.resolve();
-    }).catch(function(e){
-        deferred.reject(e);
-    });
+    } else if(opt.cobSessionToken || opt.userSessionToken || opt.cobSessionExpires || opt.userSessionExpires) {
+        throw new Error('When providing session tokens the both tokens and accompanying expiration timestamps are required.');
+    } else {
+        // cobLogin only required when tokens are not provided
+        this.cobLogin().then(function(cobLogin){
+            deferred.resolve();
+        }).catch(function(e){
+            deferred.reject(e);
+        });
+    }
 
     return deferred.promise;
 
@@ -160,9 +172,9 @@ Yodlee.prototype.login = function login(opt) {
                 this.sessionTokens.userSessionToken.expires = expires.setMinutes(expires.getMinutes() + 20);
                 deferred.resolve(JSON.parse(body));
             }
-        });
+        }.bind(this));
 
-    }).catch(function(e){
+    }.bind(this)).catch(function(e){
         deferred.reject(e);
     });
 
@@ -262,7 +274,7 @@ Yodlee.prototype.getAllSiteAccounts = function getAllSiteAccounts() {
                 deferred.resolve(JSON.parse(body));
             }
         });
-    }).catch(function(e){
+    }.bind(this)).catch(function(e){
         deferred.reject(e);
     });
 
