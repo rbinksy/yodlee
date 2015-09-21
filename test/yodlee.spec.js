@@ -10,8 +10,8 @@ chai.should();
 
 describe('yodlee node module', function() {
 
-    var request = require('request'),
-        yodlee = require('../');
+    var request = require('request');
+    var yodlee = require('../');
 
     var postStub,
         appTokenStub;

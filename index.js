@@ -45,14 +45,6 @@ Yodlee.prototype.sandboxUrl = "https://yisandbox.yodleeinteractive.com/services/
 Yodlee.prototype.liveUrl = "https://rest.developer.yodlee.com/services/srest/restserver/v1.0/";
 
 /**
-* Returns the API base URL - sandbox or live
-* @private
-*/
-Yodlee.prototype.getBaseUrl = function getBaseUrl() {
-    return this.sandbox ? this.sandboxUrl : this.liveUrl;
-};
-
-/**
  * Use the specified Cobrand details to sign requests
  * @param {object} opt Cobrand username and password
  * @throws Error if options is empty
@@ -73,7 +65,10 @@ Yodlee.prototype.use = function use(opt) {
 
         this.sandboxUsername = opt.sandboxUsername;
         this.sandboxPassword = opt.sandboxPassword;
+        this.baseUrl = this.sandboxUrl;
 
+    } else {
+        this.baseUrl = this.liveUrl;
     }
 
     this.username = opt.username;
@@ -90,7 +85,7 @@ Yodlee.prototype.getAppToken = function getAppToken() {
     var deferred = Q.defer();
 
     request.post({
-        url: this.getBaseUrl() + 'authenticate/coblogin',
+        url: this.baseUrl + 'authenticate/coblogin',
         form: {
             cobrandLogin: this.username,
             cobrandPassword: this.password
@@ -102,7 +97,6 @@ Yodlee.prototype.getAppToken = function getAppToken() {
             deferred.resolve(JSON.parse(body).cobrandConversationCredentials.sessionToken);
         }
     });
-
 
     return deferred.promise;
 
@@ -123,7 +117,7 @@ Yodlee.prototype.getAccessToken = function getAccessToken(opt) {
     this.getAppToken().then(function(appSessionToken) {
 
         request.post({
-                url: this.getBaseUrl() + 'authenticate/login',
+                url: this.baseUrl + 'authenticate/login',
                 form: {
                     login: opt.username,
                     password: opt.password,
@@ -138,7 +132,7 @@ Yodlee.prototype.getAccessToken = function getAccessToken(opt) {
                     deferred.resolve(JSON.parse(body).userContext.conversationCredentials.sessionToken);
                 }
             });
-    })
+    }.bind(this))
         .catch(function(e) {
             deferred.reject(e);
         });
@@ -163,7 +157,7 @@ Yodlee.prototype.getAccounts = function getAccounts(accessToken) {
 
         request
             .post({
-                    url: this.getBaseUrl() + 'jsonsdk/SiteAccountManagement/getSiteAccounts',
+                    url: this.baseUrl + 'jsonsdk/SiteAccountManagement/getSiteAccounts',
                     form: {
                         'cobSessionToken': appSessionToken,
                         'userSessionToken': accessToken
@@ -177,7 +171,7 @@ Yodlee.prototype.getAccounts = function getAccounts(accessToken) {
                         deferred.resolve(body);
                     }
                 });
-    })
+    }.bind(this))
         .catch(function(e) {
             deferred.reject(e);
         });
@@ -208,7 +202,7 @@ Yodlee.prototype.getTransactions = function getTransactions(accessToken, opt) {
             
             request
                 .post({
-                        url: this.getBaseUrl() + 'jsonsdk/TransactionSearchService/executeUserSearchRequest',
+                        url: this.baseUrl + 'jsonsdk/TransactionSearchService/executeUserSearchRequest',
                         form: {
                             'cobSessionToken': appSessionToken,
                             'userSessionToken': accessToken,
@@ -228,7 +222,7 @@ Yodlee.prototype.getTransactions = function getTransactions(accessToken, opt) {
                             deferred.resolve(body);
                         }
                     });
-        })
+        }.bind(this))
 
         .catch(function(e) {
             deferred.reject(e);
