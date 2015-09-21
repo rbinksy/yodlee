@@ -285,10 +285,9 @@ Yodlee.prototype.getAllSiteAccounts = function getAllSiteAccounts() {
 /**
  * Retrieves all bank transactions for the given user
  *
- * @param {string} accessToken The user access token
  * @param {object} opt Optional args to call transaction
  */
-Yodlee.prototype.getTransactions = function getTransactions(accessToken, opt) {
+Yodlee.prototype.getTransactions = function getTransactions(opt) {
 
     var deferred = Q.defer();
 
@@ -298,13 +297,13 @@ Yodlee.prototype.getTransactions = function getTransactions(accessToken, opt) {
         deferred.reject('Invalid Access Token: Empty!');
     }
 
-    this.getAppToken().then(function(appSessionToken) {
+    this.getBothSessionTokens().then(function(tokens) {
             
         request.post({
             url: this.baseUrl + 'jsonsdk/TransactionSearchService/executeUserSearchRequest',
             form: {
-                'cobSessionToken': appSessionToken,
-                'userSessionToken': accessToken,
+                'cobSessionToken': tokens.cobSessionToken,
+                'userSessionToken': tokens.userSessionToken,
                 "transactionSearchRequest.containerType": opt.containerType || "All",
                 "transactionSearchRequest.higherFetchLimit": opt.higherFetchLimit || "500",
                 "transactionSearchRequest.lowerFetchLimit": opt.lowerFetchLimit || "1",
@@ -318,7 +317,7 @@ Yodlee.prototype.getTransactions = function getTransactions(accessToken, opt) {
             if (err || JSON.parse(body).errorOccurred) {
                 deferred.reject(err || JSON.parse(body).message);
             } else {
-                deferred.resolve(body);
+                deferred.resolve(JSON.parse(body));
             }
         });
 
@@ -331,7 +330,7 @@ Yodlee.prototype.getTransactions = function getTransactions(accessToken, opt) {
 };
 
 /**
- * Adds an account for a given Yodlee site
+ * Gets the login form for a given Yodlee site ID
  *
  * @param {object} opt args to get login form
  */
@@ -341,16 +340,14 @@ Yodlee.prototype.getSiteLoginForm = function getSiteLoginForm(opt) {
 
     if (!opt.siteId) {
         deferred.reject('Invalid Site ID: Empty!');
-    } else if (!opt.accessToken) {
-        deferred.reject('Invalid Access Token: Empty!');
     }
 
-    this.getAppToken().then(function(appSessionToken) {
+    this.getCobSessionToken().then(function(cobSessionToken) {
 
         request.post({
             url: this.baseUrl + 'jsonsdk/SiteAccountManagement/getSiteLoginForm',
             form: {
-                'cobSessionToken': appSessionToken,
+                'cobSessionToken': cobSessionToken,
                 'siteId': opt.siteId
             }
         },
