@@ -41,7 +41,7 @@ function Yodlee() {
 * Base URLs for sandbox or live API
 * @private
 */
-Yodlee.prototype.sandboxUrl = "https://yisandbox.yodleeinteractive.com/services/srest/private-sandbox16/v1.0/";
+Yodlee.prototype.sandboxUrl = "https://yisandbox.yodleeinteractive.com/services/srest/private-{{sandboxuser}}/v1.0/";
 Yodlee.prototype.liveUrl = "https://rest.developer.yodlee.com/services/srest/restserver/v1.0/";
 
 /**
@@ -65,7 +65,7 @@ Yodlee.prototype.use = function use(opt) {
 
         this.sandboxUsername = opt.sandboxUsername;
         this.sandboxPassword = opt.sandboxPassword;
-        this.baseUrl = this.sandboxUrl;
+        this.baseUrl = this.sandboxUrl.replace("{{sandboxuser}}", this.sandboxUsername);
 
     } else {
         this.baseUrl = this.liveUrl;
