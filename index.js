@@ -259,12 +259,12 @@ Yodlee.prototype.getUserSessionToken = function getUserSessionToken(opt) {
  * Retrieves both the userSessionToken and cobSessionToken from memory / fetches them from API if expired
  * @private
  */
-Yodlee.prototype.getBothSessionTokens = function getBothSessionTokens() {
+Yodlee.prototype.getBothSessionTokens = function getBothSessionTokens(opt) {
 
     var deferred = Q.defer();
 
     this.getCobSessionToken().then(function(cobSessionToken){
-        this.getUserSessionToken().then(function(userSessionToken){
+        this.getUserSessionToken(opt).then(function(userSessionToken){
             deferred.resolve({
                 cobSessionToken: cobSessionToken,
                 userSessionToken: userSessionToken
