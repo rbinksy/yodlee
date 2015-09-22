@@ -1,8 +1,8 @@
 'use strict';
 
-var chai = require("chai"),
-    chaiAsPromised = require("chai-as-promised"),
-    sinon = require('sinon');
+var chai = require("chai");
+var chaiAsPromised = require("chai-as-promised");
+var sinon = require('sinon');
 
 require('sinon-as-promised');
 chai.use(chaiAsPromised);
@@ -15,6 +15,7 @@ describe('yodlee node module', function() {
 
     var postStub;
     var cobSessionTokenStub;
+    var userSessionTokenStub;
     var bothSessionTokensStub;
     var cobLoginStub;
     var loginStub;
@@ -450,17 +451,34 @@ describe('yodlee node module', function() {
     });
 
     describe('getBothSessionTokens()', function() {
+
+        before(function() {
+            cobSessionTokenStub = sinon.stub(yodlee, 'getCobSessionToken');
+            userSessionTokenStub = sinon.stub(yodlee, 'getUserSessionToken');
+        });
+
+        beforeEach(function() {
+            cobSessionTokenStub.resolves('1234-5678');
+            userSessionTokenStub.resolves('1234-5678');
+        });
+
+        after(function() {
+            yodlee.getCobSessionToken.restore();
+            yodlee.getUserSessionToken.restore();
+        });
         
         it('should return both session tokens as objects', function(){
-
+            return yodlee.getBothSessionTokens().should.eventually.be.a("object");
         });
         
         it('should return an error when getCobSessionToken fails', function(){
-
+            cobSessionTokenStub.rejects('Error');
+            return yodlee.getBothSessionTokens().should.eventually.be.rejected;
         });
         
         it('should return an error when getUserSessionToken fails', function(){
-
+            userSessionTokenStub.rejects('Error');
+            return yodlee.getBothSessionTokens().should.eventually.be.rejected;
         });
 
     });
@@ -635,211 +653,5 @@ describe('yodlee node module', function() {
         });
 
     });
-
-
-
-    // TODO: Remove tests below once methods above are implemented
-
-    // describe('getAppToken()', function() {
-
-    //     it('should return the AppToken when called', function() {
-
-    //         postStub.yields(null, null, JSON.stringify({
-    //             cobrandConversationCredentials: {
-    //                 sessionToken: "token"
-    //             }
-    //         }));
-
-    //         return yodlee.getAppToken().should.eventually.be.a('string');
-
-    //     });
-
-    //     it('should return an error on an invalid response from Request', function() {
-    //         postStub.yields('error', null, null);
-    //         return yodlee.getAppToken().should.be.rejected;
-    //     });
-
-
-    //     it('should return an error on an invalid response from Yodlee API', function() {
-
-    //         postStub.yields(null, null, JSON.stringify({
-    //             Error: [{
-    //                 errorMessage: "Error"
-    //             }]
-    //         }));
-
-    //         return yodlee.getAppToken().should.be.rejected;
-
-    //     });
-
-    // });
-
-    // describe('getAccessToken()', function() {
-
-    //     before(function() {
-    //         appTokenStub = sinon.stub(yodlee, 'getAppToken');
-    //     });
-
-    //     beforeEach(function() {
-    //         appTokenStub.resolves('appToken');
-    //     });
-
-    //     after(function() {
-    //         appTokenStub = yodlee.getAppToken.restore();
-    //     });
-
-    //     // .userContext.conversationCredentials.sessionToken);
-    //     it('should return the AppToken when given a username and password', function() {
-
-    //         postStub.yields(null, null, JSON.stringify({
-    //             userContext: {
-    //                 conversationCredentials: {
-    //                     sessionToken: "token"
-    //                 }
-    //             }
-    //         }));
-
-    //         return yodlee.getAccessToken({
-    //             username: 'sbMemcraigrich2',
-    //             password: 'sbMemcraigrich2#123'
-    //         }).should.eventually.be.a('string');
-
-    //     });
-
-    //     it('should return an error on an invalid response from the API', function() {
-
-    //         postStub.yields(null, null, JSON.stringify({
-    //             Error: [{
-    //                 errorMessage: "Error"
-    //             }]
-    //         }));
-
-    //         return yodlee.getAccessToken({
-    //             username: 'sbMemcraigrich2',
-    //             password: 'sbMemcraigrich2#123'
-    //         }).should.eventually.be.rejected;
-
-    //     });
-
-    //     it('should return an error given an incorrect AppToken', function() {
-    //         appTokenStub.rejects('Invalid App Token');
-    //         return yodlee.getAccessToken({
-    //             username: 'user',
-    //             password: null
-    //         }).should.eventually.be.rejected;
-    //     });
-
-    //     it('should return an error when given no username', function() {
-    //         return yodlee.getAccessToken({
-    //             username: null,
-    //             password: 'pass'
-    //         }).should.eventually.be.rejected;
-    //     });
-
-    //     it('should return an error when given no password', function() {
-    //         return yodlee.getAccessToken({
-    //             username: 'user',
-    //             password: null
-    //         }).should.eventually.be.rejected;
-    //     });
-
-    //     it('should return an error on an invalid response from Request', function() {
-    //         postStub.yields('error', null, null);
-    //         return yodlee.getAccessToken({
-    //             username: 'sbMemcraigrich2',
-    //             password: 'sbMemcraigrich2#123'
-    //         }).should.eventually.be.rejected;
-    //     });
-
-    // });
-
-
-    // describe('getAccounts()', function() {
-
-    //     var accessToken = '12345';
-
-    //     before(function() {
-    //         appTokenStub = sinon.stub(yodlee, 'getAppToken');
-    //     });
-
-    //     beforeEach(function() {
-    //         appTokenStub.resolves('appToken');
-    //     });
-
-    //     after(function() {
-    //         appTokenStub = yodlee.getAppToken.restore();
-    //     });
-
-    //     it('should return user bank accounts when given a valid access token', function() {
-    //         postStub.yields(null, null, JSON.stringify({
-    //             data: 'Account Data'
-    //         }));
-    //         return yodlee.getAccounts(accessToken).should.eventually.be.a('string');
-    //     });
-
-    //     it('should return an error on an invalid response from the API', function() {
-    //         postStub.yields(null, null, JSON.stringify({
-    //             Error: [{
-    //                 errorMessage: "Error"
-    //             }]
-    //         }));
-    //         return yodlee.getAccounts(accessToken).should.eventually.be.rejected;
-    //     });
-
-    //     it('should return an error when called with no access token', function() {
-    //         return yodlee.getAccounts().should.eventually.be.rejected;
-    //     });
-
-    //     it('should return an error given an incorrect AppToken', function() {
-    //         appTokenStub.rejects('Invalid App Token');
-    //         return yodlee.getAccounts(accessToken).should.eventually.be.rejected;
-    //     });
-
-    // });
-
-    // describe('getTransactions()', function() {
-
-    //     var accessToken = '12345';
-
-    //     before(function() {
-    //         appTokenStub = sinon.stub(yodlee, 'getAppToken');
-    //     });
-
-    //     beforeEach(function() {
-    //         appTokenStub.resolves('appToken');
-    //     });
-
-    //     after(function() {
-    //         appTokenStub = yodlee.getAppToken.restore();
-    //     });
-
-    //     it('should return user recent transactions when given a valid access token', function() {
-    //         postStub.yields(null, null, JSON.stringify({
-    //             data: 'Account Data'
-    //         }));
-    //         return yodlee.getTransactions(accessToken).should.eventually.be.a('string');
-    //     });
-
-    //     it('should return an error on an invalid response from the API', function() {
-    //         postStub.yields(null, null, JSON.stringify({
-    //             errorOccurred: true,
-    //             message: 'error'
-
-    //         }));
-    //         return yodlee.getTransactions(accessToken).should.eventually.be.rejected;
-    //     });
-
-    //     it('should return an error when called with no access token', function() {
-    //         return yodlee.getTransactions().should.eventually.be.rejected;
-    //     });
-
-    //     it('should return an error given an incorrect AppToken', function() {
-    //         appTokenStub.rejects('Invalid App Token');
-    //         return yodlee.getTransactions(accessToken).should.eventually.be.rejected;
-    //     });
-
-    // });
-
-
 
 });
