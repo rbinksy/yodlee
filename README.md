@@ -85,8 +85,9 @@ Returns the information related to the specified accounts aggregated by the User
 
 
 ```js
-yodlee.getAllSiteAccounts().then(function(response) {})
-  .catch(function(error) {}); 
+yodlee.getAllSiteAccounts().then(function(accounts) {
+  // The JSON response from the Yodlee API is passed into this function (see link above for details)
+}).catch(function(error) {}); 
 
 ```
 
@@ -94,7 +95,7 @@ yodlee.getAllSiteAccounts().then(function(response) {})
 Executes a transaction search and returns the first page result: [Yodlee Docs](https://developer.yodlee.com/Aggregation_API/Aggregation_Services_Guide/Aggregation_REST_API_Reference/executeUserSearchRequest)
 
 ```js
-yodlee.getTransactions(accessToken, {
+yodlee.getTransactions({
   containerType: 'All',
   higherFetchLimit: 500,
   lowerFetchLimit: 1,
@@ -102,9 +103,9 @@ yodlee.getTransactions(accessToken, {
   resultRangeStartNumber: 1,
   searchFilterCurrencyCode: 'GBP',
   ignoreUserInput: true
-})
-  .then(function(response) {})
-  .catch(function(error) {}); 
+}).then(function(transactions) {
+  // The JSON response from the Yodlee API is passed into this function (see link above for details)
+}).catch(function(error) {}); 
 
 ```
 
