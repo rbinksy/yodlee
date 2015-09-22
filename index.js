@@ -67,14 +67,14 @@ Yodlee.prototype.sessionTokens = {
 /**
  * Use the specified Cobrand details to sign requests
  * @param {object} opt Cobrand username and password
- * @throws Error if options is empty
+ *
  */
 Yodlee.prototype.use = function use(opt) {
 
     var deferred = Q.defer();
 
     if (!opt.username || !opt.password) {
-        throw new Error('Invalid Cobrand Credentials: Empty ' + (!(opt.username) ? 'username' : 'password'));
+        deferred.reject('Invalid Cobrand Credentials: Empty ' + (!(opt.username) ? 'username' : 'password'));
     }
 
     this.sandbox = (opt.sandbox === true);
@@ -87,22 +87,30 @@ Yodlee.prototype.use = function use(opt) {
         this.baseUrl = this.liveUrl;
     }
 
-    // User can overrride tokens up front if they have cached valid tokens
     if(opt.cobSessionToken && opt.userSessionToken && opt.cobSessionExpires && opt.userSessionExpires) {
+
+        // User can overrride tokens up front if they have cached valid tokens
         this.sessionTokens.cobSessionToken.token = opt.cobSessionToken;
         this.sessionTokens.cobSessionToken.expires = opt.cobSessionExpires;
         this.sessionTokens.userSessionToken.token = opt.userSessionToken;
         this.sessionTokens.userSessionToken.expires = opt.userSessionExpires;
-        deferred.resolve();
-    } else if(opt.cobSessionToken || opt.userSessionToken || opt.cobSessionExpires || opt.userSessionExpires) {
-        throw new Error('When providing session tokens both tokens and accompanying expiration timestamps are required.');
-    } else {
+
+        deferred.resolve(this.sessionTokens);
+
+    } else if(!opt.cobSessionToken && !opt.userSessionToken && !opt.cobSessionExpires && !opt.userSessionExpires) {
+
         // cobLogin only required when tokens are not provided
-        this.cobLogin().then(function(){
-            deferred.resolve();
-        }).catch(function(e){
+        this.cobLogin().then(function(){ 
+            deferred.resolve(this.sessionTokens);
+        }.bind(this)).catch(function(e){
             deferred.reject(e);
         });
+
+    } else {
+
+        // By reaching here we know some of the tokens were provided but not all of them
+        deferred.reject('When providing session tokens both tokens and accompanying expiration timestamps are required.');
+
     }
 
     return deferred.promise;
@@ -111,14 +119,14 @@ Yodlee.prototype.use = function use(opt) {
 
 /**
  * Fetch the cobLogin object and save cobSessionToken in memory
- * @throws Error if username and password for cobLogin have not been set
+ *
  */
-Yodlee.prototype.cobLogin = function() {
+Yodlee.prototype.cobLogin = function cobLogin() {
 
     var deferred = Q.defer();
 
     if (!this.username || !this.password) {
-        throw new Error('Invalid Username and Password: Empty ' + (!(this.username) ? 'username' : 'password'));
+        deferred.reject('Invalid Cobrand Login: Empty ' + (!(this.username) ? 'username' : 'password'));
     }
 
     request.post({
@@ -128,14 +136,20 @@ Yodlee.prototype.cobLogin = function() {
             cobrandPassword: this.password
         }
     }, function(err, response, body) {
+
         if (err || JSON.parse(body).Error) {
             deferred.reject(err || JSON.parse(body).Error[0].errorDetail);
         } else {
+            
             var expires = new Date();
+
             this.sessionTokens.cobSessionToken.token = JSON.parse(body).cobrandConversationCredentials.sessionToken;
             this.sessionTokens.cobSessionToken.expires = expires.setMinutes(expires.getMinutes() + 20);
+
             deferred.resolve(JSON.parse(body));
+
         }
+
     }.bind(this));
 
     return deferred.promise;
@@ -164,14 +178,20 @@ Yodlee.prototype.login = function login(opt) {
                 cobSessionToken: cobSessionToken
             }
         }, function(err, response, body) {
+
             if (err || JSON.parse(body).Error) {
                 deferred.reject(err || JSON.parse(body).Error[0].errorDetail);
             } else {
+
                 var expires = new Date();
+
                 this.sessionTokens.userSessionToken.token = JSON.parse(body).userContext.conversationCredentials.sessionToken;
                 this.sessionTokens.userSessionToken.expires = expires.setMinutes(expires.getMinutes() + 20);
+
                 deferred.resolve(JSON.parse(body));
+
             }
+
         }.bind(this));
 
     }.bind(this)).catch(function(e){
@@ -208,9 +228,9 @@ Yodlee.prototype.getCobSessionToken = function getCobSessionToken() {
 
 /**
  * Retrieves userSessionToken from memory or login if expired / not set
- * @private
+ * @param {object} opt User username and password
  */
-Yodlee.prototype.getUserSessionToken = function getUserSessionToken() {
+Yodlee.prototype.getUserSessionToken = function getUserSessionToken(opt) {
 
     var deferred = Q.defer();
 
@@ -218,8 +238,10 @@ Yodlee.prototype.getUserSessionToken = function getUserSessionToken() {
 
     if(this.sessionTokens.userSessionToken.token != null && this.sessionTokens.userSessionToken.expires > date.getTime()) {
         deferred.resolve(this.sessionTokens.userSessionToken.token);
+    } else if (!opt.username || !opt.password) {
+        deferred.reject('User Session expired, user credentials required: Empty ' + (!(opt.username) ? 'username' : 'password'));
     } else {
-        this.cobLogin().then(function(login) {
+        this.login(opt).then(function(login) {
             deferred.resolve(login.userContext.conversationCredentials.sessionToken);
         }).catch(function(e) {
             deferred.reject(e);
@@ -313,7 +335,7 @@ Yodlee.prototype.getTransactions = function getTransactions(opt) {
             }
         },
         function(err, response, body) {
-            if (err || JSON.parse(body).errorOccurred) {
+            if (err || JSON.parse(body).Error) {
                 deferred.reject(err || JSON.parse(body).message);
             } else {
                 deferred.resolve(JSON.parse(body));
