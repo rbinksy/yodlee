@@ -109,6 +109,17 @@ yodlee.getTransactions({
 
 ```
 
+### GET Site Login Form
+Returns the login form structure for a given Yodlee Site ID: [Yodlee Docs](https://developer.yodlee.com/Aggregation_API/Aggregation_Services_Guide/Aggregation_REST_API_Reference/getSiteLoginForm)
+
+```js
+yodlee.getSiteLoginForm({
+  siteId: 3970
+}).then(function(loginForm) {
+  // The JSON response from the Yodlee API is passed into this function (see link above for details)
+}).catch(function(error) {}); 
+
+
 ## Contributing
 
 ##### Unit tests
