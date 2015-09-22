@@ -34,14 +34,14 @@ yodlee.use({
     password: 'password@123#'
   }).then(function(login) {
     // Access the tokens via the login object passed to this function
-  }).catch(function() {});
+  }).catch(function(error) {});
   
 }).catch(function(error) {});
 
 ```
 
 ## Accessing authentication tokens
-The authentication tokens are cached in the application memory for 20 minutes after authentication by the steps above. The tokens should be accessed by the helper methods below. These methods will determine whether or not a new token is required based on the expirration timestamp stored in memory.
+The authentication tokens are cached in the application memory for 20 minutes after authentication by the steps above. The tokens should be accessed by the helper methods below. These methods will determine whether or not a new token is required based on the expiration timestamp stored in memory.
 
 After performing a login you can access the session tokens using the helper methods below.
 
@@ -61,6 +61,20 @@ yodlee.getUserSessionToken({
 }).catch(function(error) {}); 
 
 ```
+
+```js
+yodlee.getBothSessionTokens({
+  username: 'app.user',
+  password: 'password@123#'
+}).then(function(tokens) {
+  // The tokens are returned in an Object
+  // tokens.cobSessionToken
+  // tokens.userSessionToken
+}).catch(function(error) {}); 
+
+```
+
+Note: When calling getBothSessionTokens & getUserSessionToken the method will only require the username and password for the user if a new userSessionToken is required. This is because a new login request will be performed against the Yodlee API.
 
 ## Using the API
 ### GET User Accounts
