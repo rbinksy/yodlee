@@ -16,7 +16,7 @@ var yodlee = require('yodlee');
 ```
 
 
-## Authentication using Cobrand Credentials
+## Authentication using Cobrand Credentials & User Login
 Yodlee requires a cobSessionToken before we can access the API. Get your credentials [here](https://devnow.yodlee.com).
 You can specify whether you wish to use the Sandbox API or the Live API when setting the Cobrand Credentials.
 
@@ -32,20 +32,23 @@ yodlee.use({
   yodlee.login({
     username: 'app.user',
     password: 'password@123#'
-  })
-    .then(function(login) {})
-    .catch(function() {});
+  }).then(function(login) {
+    // Access the tokens via the login object passed to this function
+  }).catch(function() {});
   
 }).catch(function(error) {});
 
 ```
 
+## Accessing authentication tokens
+The authentication tokens are cached in the application memory for 20 minutes after authentication by the steps above. The tokens should be accessed by the helper methods below. These methods will determine whether or not a new token is required based on the expirration timestamp stored in memory.
+
 After performing a login you can access the session tokens using the helper methods below.
 
 ```js
-yodlee.getCobSessionToken()
-  .then(function(cobSessionToken) {})
-  .catch(function(error) {}); 
+yodlee.getCobSessionToken().then(function(cobSessionToken) {
+  // The cobSessionToken is returned as a String
+}).catch(function(error) {}); 
 
 ```
 
@@ -54,6 +57,7 @@ yodlee.getUserSessionToken({
   username: 'app.user',
   password: 'password@123#'
 }).then(function(userSessionToken) {
+  // The userSessionToken is returned as a String
 }).catch(function(error) {}); 
 
 ```
