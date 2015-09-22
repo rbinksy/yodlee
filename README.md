@@ -77,13 +77,15 @@ yodlee.getBothSessionTokens({
 Note: When calling `getBothSessionTokens` & `getUserSessionToken` the method will only require the username and password for the user if a new `userSessionToken` is required. This is because a new login request will be performed against the Yodlee API.
 
 ## Using the API
-### GET User Accounts
-Returns the information related to the specified accounts aggregated by the User: [Yodlee Docs](https://developer.yodlee.com/Aggregation_API/Aggregation_Services_Guide/Aggregation_REST_API_Reference/getSiteAccounts)
+
+Once a user has successfully authenticated against the API the following methods can be used. Each method will determine which access tokens are required and only go to the Yodlee Auth API for new tokens when they have expired. Therefore, in most scenarios, a simple call to `use` and `login` methods is required and the Yodlee Node library will take care of all other authentication decisions. The helper methods for access tokens above are only really useful if you wish to perform your own caching of the tokens in your application and need to access them for persistence purposes, or something similar.
+
+### GET All Site Accounts
+Returns the information related to the specified accounts aggregated by the User: [Yodlee Docs](https://developer.yodlee.com/Aggregation_API/Aggregation_Services_Guide/Aggregation_REST_API_Reference/getAllSiteAccounts)
 
 
 ```js
-yodlee.getAccounts(accessToken)
-  .then(function(response) {})
+yodlee.getAllSiteAccounts().then(function(response) {})
   .catch(function(error) {}); 
 
 ```
