@@ -18,24 +18,40 @@ var yodlee = require('yodlee');
 
 ## Authentication using Cobrand Credentials
 Yodlee requires a cobSessionToken before we can access the API. Get your credentials [here](https://devnow.yodlee.com).
+You can specify whether you wish to use the Sandbox API or the Live API when setting the Cobrand Credentials.
+
+Yodlee uses the standard oauth authentication flow in order to allow apps to act on a user's behalf. Perform a login request to use the Yodlee API on behalf of a specific user after the Cobrand login step completes.
 
 ```js
 yodlee.use({
     username: 'sbCobExampleAdminUser',
-    password: '96d621ec-2323-4664-b2fa-17ba6796b116'
-});
+    password: '96d621ec-2323-4664-b2fa-17ba6796b116',
+    sandbox: true
+}).then(function() {
+  
+  yodlee.login({
+    username: 'app.user',
+    password: 'password@123#'
+  })
+    .then(function(login) {})
+    .catch(function() {});
+  
+}).catch(function(error) {});
 
 ```
 
-## OAuth Requests
-Yodlee uses the standard oauth authentication flow in order to allow apps to act on a user's behalf. The API provides a convenience method to help you authenticate your users. 
+After performing a login you can access the session tokens using the helper methods below.
 
 ```js
-yodlee.getAccessToken({
-    username: 'sbMemsomeuser',
-    password: 'sbMemsomeuser#123'
-})
-  .then(function(accessToken) {})
+yodlee.getCobSessionToken()
+  .then(function(cobSessionToken) {})
+  .catch(function(error) {}); 
+
+```
+
+```js
+yodlee.getUserSessionToken()
+  .then(function(userSessionToken) {})
   .catch(function(error) {}); 
 
 ```
