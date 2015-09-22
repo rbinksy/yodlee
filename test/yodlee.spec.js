@@ -17,6 +17,7 @@ describe('yodlee node module', function() {
     var cobSessionTokenStub;
     var bothSessionTokensStub;
     var cobLoginStub;
+    var loginStub;
 
     before(function() {
 
@@ -339,11 +340,7 @@ describe('yodlee node module', function() {
             yodlee.sessionTokens.cobSessionToken.token = "1234-8888";
             yodlee.sessionTokens.cobSessionToken.expires = (new Date()).setMinutes((new Date()).getMinutes() - 25);
 
-            var state = yodlee.getCobSessionToken().should.eventually.be.a("string");
-
-            yodlee.sessionTokens.cobSessionToken.token.should.equal('1234-8888');
-
-            return state;
+            return yodlee.getCobSessionToken().should.eventually.be.a("string");
 
         });
         
@@ -362,27 +359,91 @@ describe('yodlee node module', function() {
 
     describe('getUserSessionToken()', function() {
         
+        before(function() {
+            loginStub = sinon.stub(yodlee, 'login');
+        });
+
+        after(function() {
+            yodlee.login.restore();
+        });
+
         it('should return session token from memory when set and not expired', function(){
+
+            yodlee.sessionTokens.userSessionToken.token = "1234-0000";
+            yodlee.sessionTokens.userSessionToken.expires = (new Date()).setMinutes((new Date()).getMinutes() + 25);
+
+            var state = yodlee.getUserSessionToken().should.eventually.be.a("string");
+
+            yodlee.sessionTokens.userSessionToken.token.should.equal('1234-0000');
+
+            return state;
 
         });
         
         it('should return session token from login when not set', function(){
 
+            loginStub.resolves({
+                userContext: {
+                    conversationCredentials: {
+                        sessionToken: "1234-9999"
+                    }
+                }
+            });
+
+            yodlee.sessionTokens.userSessionToken.token = null;
+            yodlee.sessionTokens.userSessionToken.expires = null;
+
+            return yodlee.getUserSessionToken({
+                username: 'sandboxuser',
+                password: 'password@123'
+            }).should.eventually.be.a("string");
+
         });
         
         it('should return session token from login when expired', function(){
+
+            yodlee.sessionTokens.userSessionToken.token = "1234-8888";
+            yodlee.sessionTokens.userSessionToken.expires = (new Date()).setMinutes((new Date()).getMinutes() - 25);
+
+            return yodlee.getUserSessionToken({
+                username: 'sandboxuser',
+                password: 'password@123'
+            }).should.eventually.be.a("string");
 
         });
         
         it('should return an error when login fails and session token not set', function(){
 
+            loginStub.rejects('Error');
+
+            yodlee.sessionTokens.userSessionToken.token = null;
+            yodlee.sessionTokens.userSessionToken.expires = null;
+
+            return yodlee.getUserSessionToken().should.eventually.be.rejected;
+
         });
         
         it('should return an error when username not provided and login required', function(){
 
+            yodlee.sessionTokens.userSessionToken.token = null;
+            yodlee.sessionTokens.userSessionToken.expires = null;
+
+            return yodlee.getUserSessionToken({
+                username: '',
+                password: 'password@123'
+            }).should.eventually.be.rejectedWith("User Session expired, user credentials required: Empty username");
+
         });
         
         it('should return an error when password not provided and login required', function(){
+
+            yodlee.sessionTokens.userSessionToken.token = null;
+            yodlee.sessionTokens.userSessionToken.expires = null;
+
+            return yodlee.getUserSessionToken({
+                username: 'sandboxuser',
+                password: ''
+            }).should.eventually.be.rejectedWith("User Session expired, user credentials required: Empty password");
 
         });
         
@@ -423,9 +484,19 @@ describe('yodlee node module', function() {
         
         it('should return an error when fails to fetch session keys', function(){
 
+            bothSessionTokensStub.rejects('Error');
+
+            return yodlee.getAllSiteAccounts().should.be.rejectedWith("Error");
+
         });
         
         it('should return all site accounts when session keys are successfully retrieved', function(){
+
+            postStub.yields(null, null, JSON.stringify({
+                accounts: []
+            }));
+
+            return yodlee.getAllSiteAccounts().should.eventually.be.a("object");
 
         });
         
@@ -449,12 +520,37 @@ describe('yodlee node module', function() {
     });
 
     describe('getTransactions()', function() {
+
+        before(function() {
+            bothSessionTokensStub = sinon.stub(yodlee, 'getBothSessionTokens');
+        });
+
+        beforeEach(function() {
+            bothSessionTokensStub.resolves({
+                cobSessionToken: '1234-5678',
+                userSessionToken: '1234-5678'
+            });
+        });
+
+        after(function() {
+            yodlee.getBothSessionTokens.restore();
+        });
         
         it('should return an error when fails to fetch session keys', function(){
+
+            bothSessionTokensStub.rejects('Error');
+
+            return yodlee.getTransactions().should.be.rejectedWith("Error");
 
         });
         
         it('should return transactions when session keys are successfully retrieved', function(){
+
+            postStub.yields(null, null, JSON.stringify({
+                transactions: []
+            }));
+
+            return yodlee.getTransactions().should.eventually.be.a("object");
 
         });
         
@@ -479,17 +575,51 @@ describe('yodlee node module', function() {
 
     describe('getSiteLoginForm()', function() {
         
+        before(function() {
+            cobSessionTokenStub = sinon.stub(yodlee, 'getCobSessionToken');
+        });
+
+        beforeEach(function() {
+            cobSessionTokenStub.resolves('1234-5678');
+        });
+
+        after(function() {
+            yodlee.getCobSessionToken.restore();
+        });
+
         it('should return an error when fails to fetch cob session key', function(){
+
+            cobSessionTokenStub.rejects('Error');
+
+            return yodlee.getSiteLoginForm({
+                siteId: 123
+            }).should.be.rejectedWith("Error");
 
         });
         
         it('should return login form when cob session key is successfully retrieved', function(){
 
+            postStub.yields(null, null, JSON.stringify({
+                loginForm: []
+            }));
+
+            return yodlee.getSiteLoginForm({
+                siteId: 123
+            }).should.eventually.be.a("object");
+
+        });
+
+        it('should return an error when site ID is not provided', function() {
+
+            return yodlee.getSiteLoginForm().should.be.rejectedWith("Invalid Site ID: Empty!");
+
         });
         
         it('should return an error on an invalid response from Request', function() {
             postStub.yields('error', null, null);
-            return yodlee.getTransactions().should.be.rejected;
+            return yodlee.getSiteLoginForm({
+                siteId: 123
+            }).should.be.rejected;
         });
 
         it('should return an error on an invalid response from Yodlee API', function() {

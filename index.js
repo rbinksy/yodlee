@@ -234,6 +234,8 @@ Yodlee.prototype.getUserSessionToken = function getUserSessionToken(opt) {
 
     var deferred = Q.defer();
 
+    opt = opt || {};
+
     var date = new Date();
 
     if(this.sessionTokens.userSessionToken.token != null && this.sessionTokens.userSessionToken.expires > date.getTime()) {
@@ -357,6 +359,8 @@ Yodlee.prototype.getTransactions = function getTransactions(opt) {
 Yodlee.prototype.getSiteLoginForm = function getSiteLoginForm(opt) {
 
     var deferred = Q.defer();
+
+    opt = opt || {};
 
     if (!opt.siteId) {
         deferred.reject('Invalid Site ID: Empty!');
