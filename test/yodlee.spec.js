@@ -443,7 +443,10 @@ describe('yodlee node module', function() {
             yodlee.sessionTokens.userSessionToken.token = null;
             yodlee.sessionTokens.userSessionToken.expires = null;
 
-            return yodlee.getUserSessionToken().should.eventually.be.rejected;
+            return yodlee.getUserSessionToken({
+                username: 'sandboxuser',
+                password: 'password@123'
+            }).should.eventually.be.rejected;
 
         });
         
