@@ -120,6 +120,7 @@ yodlee.getSiteLoginForm({
   // The JSON response from the Yodlee API is passed into this function (see link above for details)
 }).catch(function(error) {}); 
 
+```
 
 ## Contributing
 
