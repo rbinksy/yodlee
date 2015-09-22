@@ -50,9 +50,11 @@ yodlee.getCobSessionToken()
 ```
 
 ```js
-yodlee.getUserSessionToken()
-  .then(function(userSessionToken) {})
-  .catch(function(error) {}); 
+yodlee.getUserSessionToken({
+  username: 'app.user',
+  password: 'password@123#'
+}).then(function(userSessionToken) {
+}).catch(function(error) {}); 
 
 ```
 
