@@ -74,7 +74,7 @@ yodlee.getBothSessionTokens({
 
 ```
 
-Note: When calling getBothSessionTokens & getUserSessionToken the method will only require the username and password for the user if a new userSessionToken is required. This is because a new login request will be performed against the Yodlee API.
+Note: When calling `getBothSessionTokens` & `getUserSessionToken` the method will only require the username and password for the user if a new `userSessionToken` is required. This is because a new login request will be performed against the Yodlee API.
 
 ## Using the API
 ### GET User Accounts
