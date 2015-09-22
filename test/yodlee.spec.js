@@ -146,6 +146,18 @@ describe('yodlee node module', function() {
 
         });
 
+        it('should return an error when cobLogin fails', function() {
+
+            cobLoginStub.rejects('Error');
+
+            return yodlee.use({
+                username: 'sbCobcraigrich',
+                password: '96d621ec-2323-4664-b2fa-17ba6796b116',
+                sandbox: true
+            }).should.eventually.be.rejected;
+
+        });
+
     });
 
     describe('cobLogin()', function() {
@@ -271,6 +283,17 @@ describe('yodlee node module', function() {
 
             return state;
 
+        });
+
+        it('should return an error when getCobSessionToken fails', function() {
+            
+            cobSessionTokenStub.rejects('Error');
+
+            return yodlee.login({
+                username: 'yodleeuser',
+                password: 'password@123'
+            }).should.be.rejected;
+            
         });
 
         it('should return an error on an invalid response from Request', function() {
