@@ -1,6 +1,6 @@
 #  [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coverage Status][coverage-image]][coverage-url] [![Dependency Status][daviddm-image]][daviddm-url]
 
-> Yodlee API wrapper for node.
+> Yodlee API wrapper for node. Forked from Craig Richardson's original repository: https://github.com/craigrich/yodlee
 
 
 ## Installation
