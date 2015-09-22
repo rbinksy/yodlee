@@ -293,7 +293,7 @@ describe('yodlee node module', function() {
                 username: 'yodleeuser',
                 password: 'password@123'
             }).should.be.rejected;
-            
+
         });
 
         it('should return an error on an invalid response from Request', function() {
@@ -662,7 +662,7 @@ describe('yodlee node module', function() {
                 siteId: 123
             }).should.be.rejected;
         });
-
+        
         it('should return an error on an invalid response from Yodlee API', function() {
 
             postStub.yields(null, null, JSON.stringify({
@@ -671,7 +671,9 @@ describe('yodlee node module', function() {
                 }]
             }));
 
-            return yodlee.getTransactions().should.be.rejected;
+            return yodlee.getSiteLoginForm({
+                siteId: 123
+            }).should.be.rejected;
 
         });
 
