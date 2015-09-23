@@ -432,7 +432,7 @@ describe('yodlee node module', function() {
             return yodlee.getUserSessionToken({
                 username: 'sandboxuser',
                 password: 'password@123'
-            }).should.eventually.be.a("string");
+            }).should.eventually.be.a("string"); 
 
         });
         
