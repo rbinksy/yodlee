@@ -700,8 +700,10 @@ describe('yodlee node module', function() {
 
             cobSessionTokenStub.rejects('Error');
 
-            return yodlee.getSiteLoginForm({
-                siteId: 123
+            return yodlee.register({
+                username: 'user123',
+                password: 'password@123',
+                emailAddress: 'email@domain.com'
             }).should.be.rejectedWith("Error");
 
         });
