@@ -777,4 +777,66 @@ describe('yodlee node module', function() {
 
     });
 
+    describe('searchSite()', function() {
+        
+        before(function() {
+            bothSessionTokensStub = sinon.stub(yodlee, 'getBothSessionTokens');
+        });
+
+        beforeEach(function() {
+            bothSessionTokensStub.resolves({
+                cobSessionToken: '1234-5678',
+                userSessionToken: '1234-5678'
+            });
+        });
+
+        after(function() {
+            yodlee.getBothSessionTokens.restore();
+        });
+
+        it('should return an error when fails to fetch session keys', function(){
+
+            bothSessionTokensStub.rejects('Error');
+
+            return yodlee.searchSite("halifax").should.be.rejectedWith("Error");
+
+        });
+
+        it('should return an error when search term is not provided', function(){
+
+            bothSessionTokensStub.rejects('Error');
+
+            return yodlee.searchSite().should.be.rejectedWith("Cannot search for sites with empty searchTerm");
+
+        });
+        
+        it('should return sites when session keys are successfully retrieved', function(){
+
+            postStub.yields(null, null, JSON.stringify({
+                accounts: []
+            }));
+
+            return yodlee.searchSite("halifax").should.eventually.be.a("object");
+
+        });
+        
+        it('should return an error on an invalid response from Request', function() {
+            postStub.yields('error', null, null);
+            return yodlee.searchSite("halifax").should.be.rejected;
+        });
+
+        it('should return an error on an invalid response from Yodlee API', function() {
+
+            postStub.yields(null, null, JSON.stringify({
+                Error: [{
+                    errorMessage: "Error"
+                }]
+            }));
+
+            return yodlee.searchSite("halifax").should.be.rejected;
+
+        });
+
+    });
+
 });

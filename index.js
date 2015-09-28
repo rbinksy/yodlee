@@ -434,4 +434,42 @@ Yodlee.prototype.register = function register(opt) {
 
 };
 
+/**
+ * Search for a Yodlee site
+ * @param {string} searchTerm
+ */
+Yodlee.prototype.searchSite = function register(searchTerm) {
+
+    var deferred = Q.defer();
+
+    if (!searchTerm) {
+        deferred.reject('Cannot search for sites with empty searchTerm');
+    }
+
+    this.getBothSessionTokens().then(function(tokens) {
+
+        request.post({
+            url: this.baseUrl + 'jsonsdk/SiteTraversal/searchSite',
+            form: {
+                'cobSessionToken': tokens.cobSessionToken,
+                'userSessionToken': tokens.userSessionToken,
+                'siteSearchString': searchTerm
+            }
+        },
+        function(err, response, body) {
+            if (err || JSON.parse(body).Error) {
+                deferred.reject(err || JSON.parse(body).message);
+            } else {
+                deferred.resolve(JSON.parse(body));
+            }
+        });
+
+    }.bind(this)).catch(function(e) {
+        deferred.reject(e);
+    });
+
+    return deferred.promise;
+
+};
+
 module.exports = Yodlee();
