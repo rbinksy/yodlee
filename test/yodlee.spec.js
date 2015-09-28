@@ -682,4 +682,97 @@ describe('yodlee node module', function() {
 
     });
 
+    describe('register()', function() {
+        
+        before(function() {
+            cobSessionTokenStub = sinon.stub(yodlee, 'getCobSessionToken');
+        });
+
+        beforeEach(function() {
+            cobSessionTokenStub.resolves('1234-5678');
+        });
+
+        after(function() {
+            yodlee.getCobSessionToken.restore();
+        });
+
+        it('should return an error when fails to fetch cob session key', function(){
+
+            cobSessionTokenStub.rejects('Error');
+
+            return yodlee.getSiteLoginForm({
+                siteId: 123
+            }).should.be.rejectedWith("Error");
+
+        });
+        
+        it('should return an error when username is empty', function(){
+
+            return yodlee.register({
+                username: '',
+                password: 'password@123',
+                emailAddress: 'email@domain.com'
+            }).should.be.rejectedWith("Cannot register user: Empty username");
+
+        });
+        
+        it('should return an error when password is empty', function(){
+
+            return yodlee.register({
+                username: 'user123',
+                password: '',
+                emailAddress: 'email@domain.com'
+            }).should.be.rejectedWith("Cannot register user: Empty password");
+
+        });
+        
+        it('should return an error when emailAddress is empty', function(){
+
+            return yodlee.register({
+                username: 'user123',
+                password: 'password@123',
+                emailAddress: ''
+            }).should.be.rejectedWith("Cannot register user: Empty emailAddress");
+
+        });
+        
+        it('should return registration object when cob session key is successfully retrieved', function(){
+
+            postStub.yields(null, null, JSON.stringify({ }));
+
+            return yodlee.register({
+                username: 'user123',
+                password: 'password@123',
+                emailAddress: 'email@domain.com'
+            }).should.eventually.be.a("object");
+
+        });
+        
+        it('should return an error on an invalid response from Request', function() {
+            postStub.yields('error', null, null);
+            return yodlee.register({
+                username: 'user123',
+                password: 'password@123',
+                emailAddress: 'email@domain.com'
+            }).should.be.rejected;
+        });
+        
+        it('should return an error on an invalid response from Yodlee API', function() {
+
+            postStub.yields(null, null, JSON.stringify({
+                Error: [{
+                    errorMessage: "Error"
+                }]
+            }));
+
+            return yodlee.register({
+                username: 'user123',
+                password: 'password@123',
+                emailAddress: 'email@domain.com'
+            }).should.be.rejected;
+
+        });
+
+    });
+
 });

@@ -391,4 +391,47 @@ Yodlee.prototype.getSiteLoginForm = function getSiteLoginForm(opt) {
 
 };
 
+/**
+ * Registers a new Yodlee user
+ * @param {object} opt args to register user
+ */
+Yodlee.prototype.register = function register(opt) {
+
+    var deferred = Q.defer();
+
+    opt = opt || {};
+
+    if (!opt.username || !opt.password || !opt.emailAddress) {
+        deferred.reject('Cannot register user: Empty ' + (!(opt.username) ? 'username' : 
+            (!(opt.password) ? 'password' : 'emailAddress')));
+    }
+
+    this.getCobSessionToken().then(function(cobSessionToken) {
+
+        request.post({
+            url: this.baseUrl + 'jsonsdk/UserRegistration/register3',
+            form: {
+                'cobSessionToken': cobSessionToken,
+                'userCredentials.loginName': opt.user,
+                'userCredentials.password': opt.password,
+                'userProfile.emailAddress': opt.emailAddress,
+                'userCredentials.objectInstanceType': 'com.yodlee.ext.login.PasswordCredentials'
+            }
+        },
+        function(err, response, body) {
+            if (err || JSON.parse(body).Error) {
+                deferred.reject(err || JSON.parse(body).message);
+            } else {
+                deferred.resolve(JSON.parse(body));
+            }
+        });
+
+    }.bind(this)).catch(function(e) {
+        deferred.reject(e);
+    });
+
+    return deferred.promise;
+
+};
+
 module.exports = Yodlee();
