@@ -541,6 +541,68 @@ Yodlee.prototype.validateUser = function register(username) {
 
 };
 
-// TODO: Need to add the call that will add site accounts by fetching necessary tokens and login form
+/**
+ * Add site accounts
+ * @param {number} siteId args to add site accounts
+ */
+Yodlee.prototype.addSiteAccounts = function register(siteId, credentials) {
+
+    var deferred = Q.defer();
+
+    if (!siteId) {
+        deferred.reject('Cannot validate user: Empty siteId');
+    }
+
+    if(!credentials) {
+        deferred.reject('Cannot validate user: Empty credentials');
+    }
+
+    this.getBothSessionTokens().then(function(tokens){
+
+        this.getSiteLoginForm({
+            siteId: siteId
+        }).then(function(loginForm) {
+
+            var formObj = { 
+                cobSessionToken: tokens.cobSessionToken,
+                userSessionToken: tokens.userSessionToken,
+                siteId: siteId,
+                "credentialFields.enclosedType": "com.yodlee.common.FieldInfoSingle"
+            };
+
+            loginForm.componentList.forEach(function(value, index){
+                formObj["credentialFields[" + index + "].displayName"] = value.displayName;
+                formObj["credentialFields[" + index + "].fieldType.typeName"] = value.fieldType.typeName;
+                formObj["credentialFields[" + index + "].name"] = value.name;
+                formObj["credentialFields[" + index + "].size"] = value.size;
+                formObj["credentialFields[" + index + "].value"] = credentials[index];
+                formObj["credentialFields[" + index + "].valueIdentifier"] = value.valueIdentifier;
+                formObj["credentialFields[" + index + "].valueMask"] = value.valueMask;
+                formObj["credentialFields[" + index + "].isEditable"] = value.isEditable;
+            });
+
+            request.post({
+                url: this.baseUrl + 'jsonsdk/SiteAccountManagement/addSiteAccount1',
+                form: formObj
+            },
+            function(err, response, body) {
+                if (err || JSON.parse(body).Error) {
+                    deferred.reject(err || JSON.parse(body).message);
+                } else {
+                    deferred.resolve(JSON.parse(body));
+                }
+            });
+
+        }.bind(this)).catch(function(err) {
+            deferred.reject(err);
+        });
+
+    }.bind(this)).catch(function(err){
+        deferred.reject(err);
+    });
+
+    return deferred.promise;
+
+};
 
 module.exports = Yodlee();
