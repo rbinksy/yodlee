@@ -412,7 +412,7 @@ Yodlee.prototype.register = function register(opt) {
             url: this.baseUrl + 'jsonsdk/UserRegistration/register3',
             form: {
                 'cobSessionToken': cobSessionToken,
-                'userCredentials.loginName': opt.user,
+                'userCredentials.loginName': opt.username,
                 'userCredentials.password': opt.password,
                 'userProfile.emailAddress': opt.emailAddress,
                 'userCredentials.objectInstanceType': 'com.yodlee.ext.login.PasswordCredentials'
@@ -471,5 +471,76 @@ Yodlee.prototype.searchSite = function register(searchTerm) {
     return deferred.promise;
 
 };
+
+/**
+ * Unregister a user
+ */
+Yodlee.prototype.unregister = function register() {
+
+    var deferred = Q.defer();
+
+    this.getBothSessionTokens().then(function(tokens) {
+
+        request.post({
+            url: this.baseUrl + 'jsonsdk/UserRegistration/unregister',
+            form: {
+                'cobSessionToken': tokens.cobSessionToken,
+                'userSessionToken': tokens.userSessionToken
+            }
+        },
+        function(err, response, body) {
+            if (err || JSON.parse(body).Error) {
+                deferred.reject(err || JSON.parse(body).message);
+            } else {
+                deferred.resolve(JSON.parse(body));
+            }
+        });
+
+    }.bind(this)).catch(function(e) {
+        deferred.reject(e);
+    });
+
+    return deferred.promise;
+
+};
+
+/**
+ * Validate a user based on cobrand
+ * @param {string} username args to validate Yodlee user
+ */
+Yodlee.prototype.validateUser = function register(username) {
+
+    var deferred = Q.defer();
+
+    if (!username) {
+        deferred.reject('Cannot validate user: Empty username');
+    }
+
+    this.getCobSessionToken().then(function(cobSessionToken) {
+
+        request.post({
+            url: this.baseUrl + 'jsonsdk/Login/validateUser',
+            form: {
+                'cobSessionToken': cobSessionToken,
+                'userName': username
+            }
+        },
+        function(err, response, body) {
+            if (err || JSON.parse(body).Error) {
+                deferred.reject(err || JSON.parse(body).message);
+            } else {
+                deferred.resolve(JSON.parse(body));
+            }
+        });
+
+    }.bind(this)).catch(function(e) {
+        deferred.reject(e);
+    });
+
+    return deferred.promise;
+
+};
+
+// TODO: Need to add the call that will add site accounts by fetching necessary tokens and login form
 
 module.exports = Yodlee();
