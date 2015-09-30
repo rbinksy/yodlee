@@ -618,6 +618,78 @@ describe('yodlee node module', function() {
 
     });
 
+    describe('getUserTransactions()', function() {
+
+        before(function() {
+            bothSessionTokensStub = sinon.stub(yodlee, 'getBothSessionTokens');
+        });
+
+        beforeEach(function() {
+            bothSessionTokensStub.resolves({
+                cobSessionToken: '1234-5678',
+                userSessionToken: '1234-5678'
+            });
+        });
+
+        after(function() {
+            yodlee.getBothSessionTokens.restore();
+        });
+        
+        it('should return an error when fails to fetch session keys', function(){
+
+            bothSessionTokensStub.rejects('Error');
+
+            return yodlee.getUserTransactions({
+                searchIdentifier: "209735912"
+            }).should.be.rejectedWith("Error");
+
+        });
+        
+        it('should return an error when search identifier is missing', function(){
+
+            postStub.yields(null, null, JSON.stringify({
+                transactions: []
+            }));
+
+            return yodlee.getUserTransactions().should.be.rejectedWith("Invalid Search Identifier: Empty!");
+
+        });
+        
+        it('should return transactions when session keys are successfully retrieved', function(){
+
+            postStub.yields(null, null, JSON.stringify({
+                transactions: []
+            }));
+
+            return yodlee.getUserTransactions({
+                searchIdentifier: "209735912"
+            }).should.eventually.be.a("object");
+
+        });
+        
+        it('should return an error on an invalid response from Request', function() {
+            postStub.yields('error', null, null);
+            return yodlee.getUserTransactions({
+                searchIdentifier: "209735912"
+            }).should.be.rejected;
+        });
+
+        it('should return an error on an invalid response from Yodlee API', function() {
+
+            postStub.yields(null, null, JSON.stringify({
+                Error: [{
+                    errorMessage: "Error"
+                }]
+            }));
+
+            return yodlee.getUserTransactions({
+                searchIdentifier: "209735912"
+            }).should.be.rejected;
+
+        });
+
+    });
+
     describe('getSiteLoginForm()', function() {
         
         before(function() {
