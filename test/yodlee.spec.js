@@ -19,6 +19,7 @@ describe('yodlee node module', function() {
     var bothSessionTokensStub;
     var cobLoginStub;
     var loginStub;
+    var loginFormStub;
 
     before(function() {
 
@@ -952,8 +953,19 @@ describe('yodlee node module', function() {
 
     describe('addSiteAccounts()', function() {
     
+        var formItem = {
+            displayName: 'TBC',
+            fieldType: { typeName: 'TBC' },
+            name: 'TBC',
+            size: 'TBC',
+            valueIdentifier: 'TBC',
+            valueMask: 'TBC',
+            isEditable: 'TBC'
+        };
+
         before(function() {
             bothSessionTokensStub = sinon.stub(yodlee, 'getBothSessionTokens');
+            loginFormStub = sinon.stub(yodlee, 'getSiteLoginForm');
         });
 
         beforeEach(function() {
@@ -961,10 +973,76 @@ describe('yodlee node module', function() {
                 cobSessionToken: '1234-5678',
                 userSessionToken: '1234-5678'
             });
+            loginFormStub.resolves({
+                componentList: [formItem, formItem]
+            });
         });
 
         after(function() {
+            yodlee.getSiteLoginForm.restore();
             yodlee.getBothSessionTokens.restore();
+        });
+
+        it('should return an error when fails to fetch session keys', function(){
+
+            bothSessionTokensStub.rejects('Error');
+
+            return yodlee.addSiteAccounts(3970, ["username", "password"]).should.be.rejectedWith("Error");
+
+        });
+
+        it('should return an error when siteId is not provided', function(){
+
+            return yodlee.addSiteAccounts(null, ["username", "password"]).should.be.rejectedWith("Cannot validate user: Empty siteId");
+
+        });
+
+        it('should return an error when credentials are not provided', function(){
+
+            return yodlee.addSiteAccounts(3970, null).should.be.rejectedWith("Cannot validate user: Empty credentials");
+
+        });
+
+        it('should return an error when credentials length does not match login form length', function(){
+
+            return yodlee.addSiteAccounts(3970, ["username"]).should.be.rejectedWith("You have not provided enough login credentials. This site expects 2 login parameters.");
+
+        });
+
+        it('should return an error when fails to fetch login form for site', function(){
+
+
+            loginFormStub.rejects("Error");
+
+            return yodlee.addSiteAccounts(3970, ["username", "password"]).should.be.rejected;
+
+        });
+        
+        it('should return an object when session keys are successfully retrieved', function(){
+
+            postStub.yields(null, null, JSON.stringify({
+                info: {}
+            }));
+
+            return yodlee.addSiteAccounts(3970, ["username", "password"]).should.eventually.be.a("object");
+
+        });
+        
+        it('should return an error on an invalid response from Request', function() {
+            postStub.yields('error', null, null);
+            return yodlee.addSiteAccounts(3970, ["username", "password"]).should.be.rejected;
+        });
+
+        it('should return an error on an invalid response from Yodlee API', function() {
+
+            postStub.yields(null, null, JSON.stringify({
+                Error: [{
+                    errorMessage: "Error"
+                }]
+            }));
+
+            return yodlee.addSiteAccounts(3970, ["username", "password"]).should.be.rejected;
+
         });
 
     });
