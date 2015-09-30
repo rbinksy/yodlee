@@ -839,4 +839,69 @@ describe('yodlee node module', function() {
 
     });
 
+    describe('unregister()', function() {
+    
+        before(function() {
+            bothSessionTokensStub = sinon.stub(yodlee, 'getBothSessionTokens');
+        });
+
+        beforeEach(function() {
+            bothSessionTokensStub.resolves({
+                cobSessionToken: '1234-5678',
+                userSessionToken: '1234-5678'
+            });
+        });
+
+        after(function() {
+            yodlee.getBothSessionTokens.restore();
+        });
+    
+    });
+
+    describe('validateUser()', function() {
+    
+    });
+
+    describe('addSiteAccounts()', function() {
+    
+        before(function() {
+            bothSessionTokensStub = sinon.stub(yodlee, 'getBothSessionTokens');
+        });
+
+        beforeEach(function() {
+            bothSessionTokensStub.resolves({
+                cobSessionToken: '1234-5678',
+                userSessionToken: '1234-5678'
+            });
+        });
+
+        after(function() {
+            yodlee.getBothSessionTokens.restore();
+        });
+
+    });
+
+    describe('getSiteInfo()', function() {
+    
+    });
+
+    describe('getItemSummariesForSite()', function() {
+    
+        before(function() {
+            bothSessionTokensStub = sinon.stub(yodlee, 'getBothSessionTokens');
+        });
+
+        beforeEach(function() {
+            bothSessionTokensStub.resolves({
+                cobSessionToken: '1234-5678',
+                userSessionToken: '1234-5678'
+            });
+        });
+
+        after(function() {
+            yodlee.getBothSessionTokens.restore();
+        });
+
+    });
+
 });
