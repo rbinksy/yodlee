@@ -8,3 +8,11 @@ before_install: npm install -g grunt-cli
 install: npm install
 before_script: grunt
 after_script: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+deploy:
+  provider: npm
+  email: craig.rich@hotmail.co.uk
+  api_key:
+    secure: yc0iSKqSht6cCCxG8aDGef5OOONChybHksQte9l70DHtzVViDdmNrQ147SixlurrtHM3Zv26RYvN3lFdySkApEHC/e7F5Rw5Fk2pmjCTApZUIbDYwhmrG2vZmuY7OCvrBGuhoyIKOeWcoPb0Z/9s9oTM25HxBV37+tdabYgUdgQ=
+  on:
+    tags: true
+    repo: craigrich/yodlee
