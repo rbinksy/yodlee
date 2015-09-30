@@ -563,7 +563,7 @@ describe('yodlee node module', function() {
 
     });
 
-    describe('getTransactions()', function() {
+    describe('executeUserSearch()', function() {
 
         before(function() {
             bothSessionTokensStub = sinon.stub(yodlee, 'getBothSessionTokens');
@@ -584,23 +584,23 @@ describe('yodlee node module', function() {
 
             bothSessionTokensStub.rejects('Error');
 
-            return yodlee.getTransactions().should.be.rejectedWith("Error");
+            return yodlee.executeUserSearch().should.be.rejectedWith("Error");
 
         });
         
-        it('should return transactions when session keys are successfully retrieved', function(){
+        it('should return user search when session keys are successfully retrieved', function(){
 
             postStub.yields(null, null, JSON.stringify({
                 transactions: []
             }));
 
-            return yodlee.getTransactions().should.eventually.be.a("object");
+            return yodlee.executeUserSearch().should.eventually.be.a("object");
 
         });
         
         it('should return an error on an invalid response from Request', function() {
             postStub.yields('error', null, null);
-            return yodlee.getTransactions().should.be.rejected;
+            return yodlee.executeUserSearch().should.be.rejected;
         });
 
         it('should return an error on an invalid response from Yodlee API', function() {
@@ -611,7 +611,7 @@ describe('yodlee node module', function() {
                 }]
             }));
 
-            return yodlee.getTransactions().should.be.rejected;
+            return yodlee.executeUserSearch().should.be.rejected;
 
         });
 

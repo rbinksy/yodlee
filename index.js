@@ -311,10 +311,10 @@ Yodlee.prototype.getAllSiteAccounts = function getAllSiteAccounts() {
 };
 
 /**
- * Retrieves all bank transactions for the authenticated user
+ * Retrieves transactions summary for the authenticated user
  * @param {object} opt Optional args to call transaction
  */
-Yodlee.prototype.getTransactions = function getTransactions(opt) {
+Yodlee.prototype.executeUserSearch = function executeUserSearch(opt) {
 
     var deferred = Q.defer();
 
@@ -334,6 +334,48 @@ Yodlee.prototype.getTransactions = function getTransactions(opt) {
                 "transactionSearchRequest.resultRange.startNumber": opt.startNumber || 1,
                 "transactionSearchRequest.searchFilter.currencyCode": opt.currencyCode || "USD",
                 "transactionSearchRequest.ignoreUserInput": opt.ignoreUserInput || "true"
+            }
+        },
+        function(err, response, body) {
+            if (err || JSON.parse(body).Error) {
+                deferred.reject(err || JSON.parse(body).message);
+            } else {
+                deferred.resolve(JSON.parse(body));
+            }
+        });
+
+    }.bind(this)).catch(function(e) {
+        deferred.reject(e);
+    });
+
+    return deferred.promise;
+
+};
+
+/**
+ * Retrieves transactions summary for the authenticated user
+ * @param {object} opt Optional args to call transaction
+ */
+Yodlee.prototype.getUserTransactions = function getUserTransactions(opt) {
+
+    var deferred = Q.defer();
+
+    opt = opt || {};
+
+    if(!opt.searchIdentifier) {
+        deferred.reject('Invalid Search Identifier: Empty!');
+    }
+
+    this.getBothSessionTokens().then(function(tokens) {
+            
+        request.post({
+            url: this.baseUrl + 'jsonsdk/TransactionSearchService/getUserTransactions',
+            form: {
+                'cobSessionToken': tokens.cobSessionToken,
+                'userSessionToken': tokens.userSessionToken,
+                "searchFetchRequest.searchIdentifier.identifier": opt.searchIdentifier,
+                "searchFetchRequest.searchResultRange.startNumber": opt.startNumber || "1",
+                "searchFetchRequest.searchResultRange.endNumber": opt.endNumber || "10"
             }
         },
         function(err, response, body) {
@@ -438,7 +480,7 @@ Yodlee.prototype.register = function register(opt) {
  * Search for a Yodlee site
  * @param {string} searchTerm
  */
-Yodlee.prototype.searchSite = function register(searchTerm) {
+Yodlee.prototype.searchSite = function searchSite(searchTerm) {
 
     var deferred = Q.defer();
 
@@ -475,7 +517,7 @@ Yodlee.prototype.searchSite = function register(searchTerm) {
 /**
  * Unregister a user
  */
-Yodlee.prototype.unregister = function register() {
+Yodlee.prototype.unregister = function unregister() {
 
     var deferred = Q.defer();
 
@@ -508,7 +550,7 @@ Yodlee.prototype.unregister = function register() {
  * Validate a user based on cobrand
  * @param {string} username args to validate Yodlee user
  */
-Yodlee.prototype.validateUser = function register(username) {
+Yodlee.prototype.validateUser = function validateUser(username) {
 
     var deferred = Q.defer();
 
@@ -545,7 +587,7 @@ Yodlee.prototype.validateUser = function register(username) {
  * Add site accounts
  * @param {number} siteId args to add site accounts
  */
-Yodlee.prototype.addSiteAccounts = function register(siteId, credentials) {
+Yodlee.prototype.addSiteAccounts = function addSiteAccounts(siteId, credentials) {
 
     var deferred = Q.defer();
 
@@ -599,6 +641,82 @@ Yodlee.prototype.addSiteAccounts = function register(siteId, credentials) {
 
     }.bind(this)).catch(function(err){
         deferred.reject(err);
+    });
+
+    return deferred.promise;
+
+};
+
+/**
+ * Get Site info
+ * @param {number} siteId args to get Site info
+ */
+Yodlee.prototype.getSiteInfo = function getSiteInfo(siteId) {
+
+    var deferred = Q.defer();
+
+    if (!siteId) {
+        deferred.reject('Cannot get site: Empty siteId');
+    }
+
+    this.getCobSessionToken().then(function(cobSessionToken) {
+
+        request.post({
+            url: this.baseUrl + 'jsonsdk/SiteTraversal/getSiteInfo',
+            form: {
+                'cobSessionToken': cobSessionToken,
+                'siteFilter.reqSpecifier': 1,
+                'siteFilter.siteId': siteId
+            }
+        },
+        function(err, response, body) {
+            if (err || JSON.parse(body).Error) {
+                deferred.reject(err || JSON.parse(body).message);
+            } else {
+                deferred.resolve(JSON.parse(body));
+            }
+        });
+
+    }.bind(this)).catch(function(e) {
+        deferred.reject(e);
+    });
+
+    return deferred.promise;
+
+};
+
+/**
+ * Get item summaries for site account
+ * @param {number} siteAccountId args to get Site account item summaries
+ */
+Yodlee.prototype.getItemSummariesForSite = function getItemSummariesForSite(siteAccountId) {
+
+    var deferred = Q.defer();
+
+    if (!siteAccountId) {
+        deferred.reject('Cannot get site: Empty siteAccountId');
+    }
+
+    this.getBothSessionTokens().then(function(tokens) {
+
+        request.post({
+            url: this.baseUrl + 'jsonsdk/DataService/getItemSummariesForSite',
+            form: {
+                'cobSessionToken': tokens.cobSessionToken,
+                'userSessionToken': tokens.userSessionToken,
+                'memSiteAccId': siteAccountId
+            }
+        },
+        function(err, response, body) {
+            if (err || JSON.parse(body).Error) {
+                deferred.reject(err || JSON.parse(body).message);
+            } else {
+                deferred.resolve(JSON.parse(body));
+            }
+        });
+
+    }.bind(this)).catch(function(e) {
+        deferred.reject(e);
     });
 
     return deferred.promise;
