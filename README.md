@@ -92,11 +92,11 @@ yodlee.getAllSiteAccounts().then(function(accounts) {
 
 ```
 
-### GET User Transactions
+### GET Execute User Search
 Executes a transaction search and returns the first page result: [Yodlee Docs](https://developer.yodlee.com/Aggregation_API/Aggregation_Services_Guide/Aggregation_REST_API_Reference/executeUserSearchRequest)
 
 ```js
-yodlee.getTransactions({
+yodlee.executeUserSearch({
   containerType: 'All',
   higherFetchLimit: 500,
   lowerFetchLimit: 1,
