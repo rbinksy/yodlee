@@ -138,9 +138,9 @@ MIT © [Craig Richardson](https://www.linkedin.com/in/craigalanrichardson)
 
 [npm-image]: https://badge.fury.io/js/yodlee.svg
 [npm-url]: https://npmjs.org/package/yodlee
-[travis-image]: https://travis-ci.org/lewisbarber/yodlee.svg?branch=master
-[travis-url]: https://travis-ci.org/lewisbarber/yodlee
+[travis-image]: https://travis-ci.org/craigrich/yodlee.svg?branch=master
+[travis-url]: https://travis-ci.org/craigrich/yodlee
 [daviddm-image]: https://david-dm.org/craigrich/yodlee.svg?theme=shields.io
 [daviddm-url]: https://david-dm.org/craigrich/yodlee
-[coverage-image]: https://coveralls.io/repos/lewisbarber/yodlee/badge.svg?branch=master
-[coverage-url]: https://coveralls.io/r/lewisbarber/yodlee?branch=master
+[coverage-image]: https://coveralls.io/repos/craigrich/yodlee/badge.svg?branch=master
+[coverage-url]: https://coveralls.io/r/craigrich/yodlee?branch=master
