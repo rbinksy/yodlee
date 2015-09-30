@@ -855,10 +855,22 @@ describe('yodlee node module', function() {
         after(function() {
             yodlee.getBothSessionTokens.restore();
         });
-    
+
     });
 
     describe('validateUser()', function() {
+    
+        before(function() {
+            cobSessionTokenStub = sinon.stub(yodlee, 'getCobSessionToken');
+        });
+
+        beforeEach(function() {
+            cobSessionTokenStub.resolves('1234-5678');
+        });
+
+        after(function() {
+            yodlee.getCobSessionToken.restore();
+        });
     
     });
 
@@ -883,6 +895,18 @@ describe('yodlee node module', function() {
 
     describe('getSiteInfo()', function() {
     
+        before(function() {
+            cobSessionTokenStub = sinon.stub(yodlee, 'getCobSessionToken');
+        });
+
+        beforeEach(function() {
+            cobSessionTokenStub.resolves('1234-5678');
+        });
+
+        after(function() {
+            yodlee.getCobSessionToken.restore();
+        });
+
     });
 
     describe('getItemSummariesForSite()', function() {
