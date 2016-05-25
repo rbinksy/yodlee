@@ -22,7 +22,8 @@ Yodlee requires a cobSessionToken before we can access the API. Get your credent
 ```js
 yodlee.use({
     username: 'sbCobExampleAdminUser',
-    password: '96d621ec-2323-4664-b2fa-17ba6796b116'
+    password: '96d621ec-2323-4664-b2fa-17ba6796b116',
+    api_base: 'https://rest.developer.yodlee.com/services/srest/restserver/v1.0'
 });
 
 ```
