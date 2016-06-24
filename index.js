@@ -50,6 +50,7 @@ Yodlee.prototype.use = function use(opt) {
 
     this.username = opt.username;
     this.password = opt.password;
+    this.api_base = opt.api_base || 'https://rest.developer.yodlee.com/services/srest/restserver/v1.0';
 
 };
 
@@ -62,7 +63,7 @@ Yodlee.prototype.getAppToken = function getAppToken() {
     var deferred = Q.defer();
 
     request.post({
-        url: 'https://rest.developer.yodlee.com/services/srest/restserver/v1.0/authenticate/coblogin',
+        url: this.api_base + '/authenticate/coblogin',
         form: {
             cobrandLogin: this.username,
             cobrandPassword: this.password
@@ -92,10 +93,12 @@ Yodlee.prototype.getAccessToken = function getAccessToken(opt) {
         deferred.reject('Invalid User Credentials: Empty ' + (!(opt.username) ? 'username' : 'password'));
     }
 
+    var api_base = this.api_base;
+
     this.getAppToken().then(function(appSessionToken) {
 
         request.post({
-                url: 'https://rest.developer.yodlee.com/services/srest/restserver/v1.0/authenticate/login',
+                url: api_base + '/authenticate/login',
                 form: {
                     login: opt.username,
                     password: opt.password,
@@ -130,12 +133,12 @@ Yodlee.prototype.getAccounts = function getAccounts(accessToken) {
     if (!accessToken) {
         deferred.reject('Invalid Access Token: Empty Access Token!');
     }
-
+    var api_base = this.api_base;
     this.getAppToken().then(function(appSessionToken) {
 
         request
             .post({
-                    url: 'https://rest.developer.yodlee.com/services/srest/restserver/v1.0/jsonsdk/SiteAccountManagement/getSiteAccounts',
+                    url: api_base + '/jsonsdk/SiteAccountManagement/getSiteAccounts',
                     form: {
                         'cobSessionToken': appSessionToken,
                         'userSessionToken': accessToken
@@ -174,13 +177,14 @@ Yodlee.prototype.getTransactions = function getTransactions(accessToken, opt) {
     if (!accessToken) {
         deferred.reject('Invalid Access Token: Empty!');
     }
+    var api_base = this.api_base;
 
     this.getAppToken()
         .then(function(appSessionToken) {
-            
+
             request
                 .post({
-                        url: 'https://rest.developer.yodlee.com/services/srest/restserver/v1.0/jsonsdk/TransactionSearchService/executeUserSearchRequest',
+                        url: api_base + '/jsonsdk/TransactionSearchService/executeUserSearchRequest',
                         form: {
                             'cobSessionToken': appSessionToken,
                             'userSessionToken': accessToken,
@@ -194,6 +198,7 @@ Yodlee.prototype.getTransactions = function getTransactions(accessToken, opt) {
                         }
                     },
                     function(err, response, body) {
+                      // console.log('executeUserSearchRequest body=', body);
                         if (err || JSON.parse(body).errorOccurred) {
                             deferred.reject(err || JSON.parse(body).message);
                         } else {
