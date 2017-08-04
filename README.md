@@ -74,7 +74,7 @@ yodlee.getTransactions(accessToken, {
 ## Contributing
 
 ##### Unit tests
-Unit test are written in [Mocha](http://visionmedia.github.io/mocha/). Please add a unit test for every new feature or bug fix. `npm test` to run the test suite.  
+Unit test are written in [Mocha](http://mochajs.org/). Please add a unit test for every new feature or bug fix. `npm test` to run the test suite.  
 
 ##### Documentation
 Add documentation for every API change. Feel free to send corrections or better docs!  
